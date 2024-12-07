@@ -1,0 +1,12 @@
+@import kotlin.collections.List
+@import art.shittim.routing.IdArticleLine
+
+@param lines: List<IdArticleLine>
+
+<head>
+    <title>郑州四中英才二班典籍</title>
+</head>
+<body>
+
+</body>
+
