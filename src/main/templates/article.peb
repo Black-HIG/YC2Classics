@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -147,7 +146,19 @@
     <footer style="user-select: none">TODO : 翻页逻辑(blackhig写了一坨屎)</footer>
     <footer style="user-select: none;">&copy; 郑州市第四高级中学英才二班</footer>
     <script>
-        const data = {"data":[{"time":"2024-01-17 09:30:55","content":"参加了学校组织的义务劳动。","contributor":null},{"time":"2024-09-01 09:30:55","content":"分享了一本好书。","contributor":"学生A"},{"time":"2024-11-14 09:30:55","content":"完成了一幅精美的手工作品。","contributor":"学生D"},{"time":"2024-02-12 09:30:55","content":"参加了学校组织的义务劳动。","contributor":"学生D"},{"time":"2024-08-18 09:30:55","content":"提出了一个非常有趣的问题。","contributor":"学生B"}]};
+        //const data = {"data":[{"time":"2024-01-17 09:30:55","content":"参加了学校组织的义务劳动。","contributor":null},{"time":"2024-09-01 09:30:55","content":"分享了一本好书。","contributor":"学生A"},{"time":"2024-11-14 09:30:55","content":"完成了一幅精美的手工作品。","contributor":"学生D"},{"time":"2024-02-12 09:30:55","content":"参加了学校组织的义务劳动。","contributor":"学生D"},{"time":"2024-08-18 09:30:55","content":"提出了一个非常有趣的问题。","contributor":"学生B"}]};
+        let data = {"data": []}
+
+        {% for line in lines %}
+            data["data"].push(
+                {
+                    "time": "{{ line.time }}",
+                    "content": "{{ line.line }}",
+                    "contributor": "{{ line.contrib }}"
+                }
+            )
+        {% endfor %}
+
         const itemsPerPage = 7;
         let currentPage = 1;
         const totalPages = Math.ceil(data.data.length / itemsPerPage);

@@ -35,11 +35,12 @@ dependencies {
     implementation("io.ktor:ktor-server-resources-jvm")
     implementation("io.ktor:ktor-server-cors-jvm")
     implementation("io.ktor:ktor-server-auth")
-    implementation("io.ktor:ktor-server-jte")
+    implementation("io.ktor:ktor-server-pebble")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-cio")
+    implementation("io.ktor:ktor-server-sessions")
+    implementation("io.ktor:ktor-server-auth-jwt")
     implementation("io.ktor:ktor-client-content-negotiation")
-    implementation("gg.jte:jte-kotlin:$jte_version")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
@@ -62,7 +63,7 @@ dependencies {
 
 sourceSets {
     main {
-        resources.srcDir("src/main/templates")
+        resources.srcDirs("src/main/templates")
     }
 }
 

@@ -57,7 +57,7 @@ suspend fun tokenValidity(token: String): Boolean {
 
 fun Application.configureSecurity() {
     install(Authentication) {
-        bearer("write-access") {
+        /*bearer("write-access") {
             realm = "Access to modify article"
 
             authenticate { tokenCredential ->
@@ -72,6 +72,8 @@ fun Application.configureSecurity() {
                     null
                 }
             }
-        }
+        }*/
+
+
     }
 }

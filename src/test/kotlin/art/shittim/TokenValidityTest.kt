@@ -7,7 +7,7 @@ class TokenValidityTest {
 
     @Test
     fun testValidToken() {
-        val token = "ae2d44aa-ab76-47bb-8317-28f46a02e015"
+        val token = "ad756109-3d87-4686-b078-4d4b7846ff2b"
 
         val result = runBlocking {
             tokenValidity(token)
