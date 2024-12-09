@@ -1,14 +1,12 @@
 package art.shittim.routing
 
-import art.shittim.ArticleLine
-import art.shittim.ArticleService
-import art.shittim.articleService
+import art.shittim.db.ArticleService
+import art.shittim.db.articleService
 import io.ktor.resources.*
 import io.ktor.server.jte.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.routing.get
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.selectAll
 
