@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>郑州四中英才二班典籍</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #89cff0, #d3e9f9);
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #007BFF;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+            font-size: 1.5em;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .theme-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .theme-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .theme-popup {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+        .theme-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: inline-block;
+            margin: 5px;
+        }
+        .theme-color:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+        }
+        .entry {
+            padding: 15px;
+            margin: 10px 0;
+            background: #e7f3ff;
+            border-radius: 12px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .entry:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .pagination {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .pagination a {
+            text-decoration: none;
+            color: #007BFF;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            margin: 0 5px;
+            border-radius: 8px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .pagination a:hover {
+            background-color: #007BFF;
+            color: white;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #333;
+            color: white;
+            user-select: none;
+            pointer-events: none;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>郑州四中英才二班典籍</header>
+    <button class="theme-button">颜色选择</button>
+    <div class="theme-popup">
+        <div class="theme-color" style="background-color: #28a745;" data-color="#28a745"></div>
+        <div class="theme-color" style="background-color: #007BFF;" data-color="#007BFF"></div>
+        <div class="theme-color" style="background-color: #ffc107;" data-color="#ffc107"></div>
+        <div class="theme-color" style="background-color: #ff69b4;" data-color="#ff69b4"></div>
+        <div class="theme-color" style="background-color: #fd7e14;" data-color="#fd7e14"></div>
+    </div>
+    <div class="container"><!-- 内容部分 -->
+        <!-- 等待自动生成 -->
+    </div>
+    <div class="pagination"><!-- 分页部分 -->
+        <!-- 等待自动生成 -->
+    </div>
+    <footer>&copy 郑州市第四高级中学英才二班</footer>
+    <script>
+        const entries = [
+            "条目1：示例内容1",
+            "条目2：示例内容2",
+            "条目3：示例内容3",
+            "条目4：示例内容4",
+            "条目5：示例内容5",
+            "条目6：示例内容6",
+            "条目7：示例内容7",
+            "条目8：示例内容8",
+            "条目9：示例内容9",
+            "条目10：示例内容10",
+            "条目11：示例内容11",
+            "条目12：示例内容12",
+            "条目13：示例内容13",
+            "条目14：示例内容14"
+        ];
+        const itemsPerPage = 7;
+        let currentPage = 1;
+        const totalPages = Math.ceil(entries.length / itemsPerPage);
+        const container = document.querySelector('.container');
+        const pagination = document.querySelector('.pagination');
+        const themeButton = document.querySelector('.theme-button');
+        const themePopup = document.querySelector('.theme-popup');
+        const themeColors = document.querySelectorAll('.theme-color');
+
+        function loadTheme() {
+            const savedColor = localStorage.getItem('themeColor') || '#007BFF';
+            document.querySelector('header').style.backgroundColor = savedColor;
+            document.querySelector('footer').style.backgroundColor = savedColor;
+            document.body.style.background = `linear-gradient(135deg, ${savedColor}, #d3e9f9)`;
+        }
+
+        themeButton.addEventListener('click', () => {
+            themePopup.style.display = themePopup.style.display === 'block' ? 'none' : 'block';
+        });
+
+        themeColors.forEach(color => {
+            color.addEventListener('click', () => {
+                const selectedColor = color.getAttribute('data-color');
+                localStorage.setItem('themeColor', selectedColor);
+                loadTheme();
+                themePopup.style.display = 'none';
+            });
+        });
+
+        function renderPagination() {
+            pagination.innerHTML = '';
+            const prevLink = document.createElement('a');
+            prevLink.textContent = '上一页';
+            prevLink.href = '#';
+            prevLink.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderPage(currentPage);
+                }
+                return false;
+            };
+            pagination.appendChild(prevLink);
+            for (let i = 1; i <= totalPages; i++) {
+                const pageLink = document.createElement('a');
+                pageLink.textContent = i;
+                pageLink.href = '#';
+                if (i === currentPage) {
+                    pageLink.style.fontWeight = 'bold';
+                }
+                pageLink.onclick = () => {
+                    currentPage = i;
+                    renderPage(currentPage);
+                    return false;
+                };
+                pagination.appendChild(pageLink);
+            }
+            const nextLink = document.createElement('a');
+            nextLink.textContent = '下一页';
+            nextLink.href = '#';
+            nextLink.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderPage(currentPage);
+                }
+                return false;
+            };
+            pagination.appendChild(nextLink);
+        }
+
+        function renderPage(pageNumber) {
+            container.innerHTML = '';
+            const start = (pageNumber - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageEntries = entries.slice(start, end);
+            pageEntries.forEach(entry => {
+                const div = document.createElement('div');
+                div.className = 'entry';
+                div.textContent = entry;
+                container.appendChild(div);
+            });
+            renderPagination();
+        }
+
+        loadTheme();
+        renderPage(currentPage);
+    </script>
+</body>
+</html>
