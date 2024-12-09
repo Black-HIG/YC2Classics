@@ -1,0 +1,10 @@
+services:
+  web:
+    ports:
+      - "31234:31234"
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: pos
