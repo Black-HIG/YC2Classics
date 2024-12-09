@@ -7,18 +7,21 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #89cff0, #d3e9f9);
-            color: #333;
             margin: 0;
             padding: 0;
+            color: #333;
+            background: var(--page-bg-gradient, linear-gradient(135deg, #f8e1e7, #fcfafb));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s ease;
         }
         header {
-            background-color: #007BFF;
+            background: transparent;
             color: white;
             text-align: center;
             padding: 1em 0;
             font-size: 1.5em;
-            border-radius: 0 0 10px 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .theme-button {
@@ -26,17 +29,12 @@
             top: 10px;
             right: 10px;
             padding: 10px;
-            background-color: #007BFF;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .theme-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
         }
         .theme-popup {
             position: absolute;
@@ -60,29 +58,49 @@
             display: inline-block;
             margin: 5px;
         }
-        .theme-color:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
         .container {
             max-width: 800px;
+            min-width: 300px;
+            width: 80%;
             margin: 20px auto;
             padding: 20px;
-            background: white;
+            background: rgba(255, 255, 255, 0.9);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 16px;
         }
         .entry {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             padding: 15px;
-            margin: 10px 0;
-            background: #e7f3ff;
+            background: var(--entry-bg-color, #e7f3ff);
             border-radius: 12px;
+            word-wrap: break-word;
+            overflow: hidden;
+            position: relative;
+            min-height: 40px;
+            margin-bottom: 10px;
             transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .entry:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            elevation;
+            transform: scale(1.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .entry-time {
+            position: absolute;
+            top: 5px;
+            left: 15px;
+            font-size: 0.8em;
+            color: #aaa;
+        }
+        .entry-contributor {
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            font-size: 0.8em;
+            color: #aaa;
         }
         .pagination {
             text-align: center;
@@ -104,13 +122,14 @@
         footer {
             text-align: center;
             padding: 10px 0;
-            background-color: #333;
+            background: transparent;
             color: white;
-            user-select: none;
-            pointer-events: none;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            margin-top: auto;
+        }
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+            }
         }
     </style>
 </head>
@@ -118,39 +137,19 @@
     <header>郑州四中英才二班典籍</header>
     <button class="theme-button">颜色选择</button>
     <div class="theme-popup">
-        <div class="theme-color" style="background-color: #28a745;" data-color="#28a745"></div>
-        <div class="theme-color" style="background-color: #007BFF;" data-color="#007BFF"></div>
-        <div class="theme-color" style="background-color: #ffc107;" data-color="#ffc107"></div>
-        <div class="theme-color" style="background-color: #ff69b4;" data-color="#ff69b4"></div>
-        <div class="theme-color" style="background-color: #fd7e14;" data-color="#fd7e14"></div>
+        <div class="theme-color" style="background-color: #28a745;" data-page-bg="#28a745" data-entry-bg="#d4edda"></div>
+        <div class="theme-color" style="background-color: #007BFF;" data-page-bg="#007BFF" data-entry-bg="#cce5ff"></div>
+        <div class="theme-color" style="background-color: #ffc107;" data-page-bg="#ffc107" data-entry-bg="#fff3cd"></div>
+        <div class="theme-color" style="background-color: #ff69b4;" data-page-bg="#ff69b4" data-entry-bg="#ffe4e1"></div>
     </div>
-    <div class="container"><!-- 内容部分 -->
-        <!-- 等待自动生成 -->
-    </div>
-    <div class="pagination"><!-- 分页部分 -->
-        <!-- 等待自动生成 -->
-    </div>
-    <footer>&copy 郑州市第四高级中学英才二班</footer>
+    <div class="container"></div>
+    <div class="pagination"></div>
+    <footer style="user-select: none;">&copy; 郑州市第四高级中学英才二班</footer>
     <script>
-        const entries = [
-            "条目1：示例内容1",
-            "条目2：示例内容2",
-            "条目3：示例内容3",
-            "条目4：示例内容4",
-            "条目5：示例内容5",
-            "条目6：示例内容6",
-            "条目7：示例内容7",
-            "条目8：示例内容8",
-            "条目9：示例内容9",
-            "条目10：示例内容10",
-            "条目11：示例内容11",
-            "条目12：示例内容12",
-            "条目13：示例内容13",
-            "条目14：示例内容14"
-        ];
+        const data = {"data":[{"time":"2024-01-17 09:30:55","content":"参加了学校组织的义务劳动。","contributor":null},{"time":"2024-09-01 09:30:55","content":"分享了一本好书。","contributor":"学生A"},{"time":"2024-11-14 09:30:55","content":"完成了一幅精美的手工作品。","contributor":"学生D"},{"time":"2024-02-12 09:30:55","content":"参加了学校组织的义务劳动。","contributor":"学生D"},{"time":"2024-08-18 09:30:55","content":"提出了一个非常有趣的问题。","contributor":"学生B"}]};
         const itemsPerPage = 7;
         let currentPage = 1;
-        const totalPages = Math.ceil(entries.length / itemsPerPage);
+        const totalPages = Math.ceil(data.data.length / itemsPerPage);
         const container = document.querySelector('.container');
         const pagination = document.querySelector('.pagination');
         const themeButton = document.querySelector('.theme-button');
@@ -158,10 +157,11 @@
         const themeColors = document.querySelectorAll('.theme-color');
 
         function loadTheme() {
-            const savedColor = localStorage.getItem('themeColor') || '#007BFF';
-            document.querySelector('header').style.backgroundColor = savedColor;
-            document.querySelector('footer').style.backgroundColor = savedColor;
-            document.body.style.background = `linear-gradient(135deg, ${savedColor}, #d3e9f9)`;
+            const savedPageBg = localStorage.getItem('pageBgColor') || '#007BFF';
+            const savedEntryBg = localStorage.getItem('entryBgColor') || '#e7f3ff';
+            document.body.style.setProperty('--page-bg-gradient', `linear-gradient(135deg, ${savedPageBg}, #f9f9f9)`);
+            document.documentElement.style.setProperty('--entry-bg-color', savedEntryBg);
+            themeButton.style.backgroundColor = savedPageBg;
         }
 
         themeButton.addEventListener('click', () => {
@@ -170,8 +170,10 @@
 
         themeColors.forEach(color => {
             color.addEventListener('click', () => {
-                const selectedColor = color.getAttribute('data-color');
-                localStorage.setItem('themeColor', selectedColor);
+                const pageBg = color.getAttribute('data-page-bg');
+                const entryBg = color.getAttribute('data-entry-bg');
+                localStorage.setItem('pageBgColor', pageBg);
+                localStorage.setItem('entryBgColor', entryBg);
                 loadTheme();
                 themePopup.style.display = 'none';
             });
@@ -221,11 +223,15 @@
             container.innerHTML = '';
             const start = (pageNumber - 1) * itemsPerPage;
             const end = start + itemsPerPage;
-            const pageEntries = entries.slice(start, end);
+            const pageEntries = data.data.slice(start, end);
             pageEntries.forEach(entry => {
                 const div = document.createElement('div');
                 div.className = 'entry';
-                div.textContent = entry;
+                div.innerHTML = `
+                    <span class="entry-time">${entry.time}</span>
+                    <span class="entry-contributor">${entry.contributor || ''}</span>
+                    <div>${entry.content}</div>
+                `;
                 container.appendChild(div);
             });
             renderPagination();
