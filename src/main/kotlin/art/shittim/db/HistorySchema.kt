@@ -1,2 +1,0 @@
-package art.shittim.db
-
