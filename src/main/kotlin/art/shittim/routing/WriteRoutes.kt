@@ -1,7 +1,6 @@
 package art.shittim.routing
 
 import art.shittim.db.ArticleLine
-import art.shittim.db.NoTimeArticleLine
 import art.shittim.db.articleService
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -9,18 +8,26 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.Serializable
 
+@Serializable
+data class RequestArticleLine(
+    var time: LocalDateTime?,
+    val contrib: String,
+    val line: String
+)
 
 fun Route.writeRoutes() {
-    authenticate("write-access") {
+    authenticate("auth-jwt") {
         post("/line/append") {
-            val line = call.receive<NoTimeArticleLine>()
+            val line = call.receive<RequestArticleLine>()
 
             articleService.create(
                 ArticleLine(
-                    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                    line.time ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     line.contrib,
                     line.line
                 )
@@ -34,9 +41,9 @@ fun Route.writeRoutes() {
 
             articleService.update(
                 id.toInt(),
-                call.receive<NoTimeArticleLine>().let {
+                call.receive<RequestArticleLine>().let {
                     ArticleLine(
-                        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                        it.time ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                         it.contrib,
                         it.line
                     )
@@ -46,7 +53,7 @@ fun Route.writeRoutes() {
             call.respond(HttpStatusCode.OK)
         }
 
-        delete("/lines/{id}") {
+        delete("/line/{id}") {
             val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
 
             articleService.delete(id.toInt())

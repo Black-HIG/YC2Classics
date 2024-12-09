@@ -10,12 +10,6 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @Serializable
-data class NoTimeArticleLine(
-    val contrib: String,
-    val line: String
-)
-
-@Serializable
 data class ArticleLine(
     val time: LocalDateTime,
     val contrib: String,
@@ -23,7 +17,7 @@ data class ArticleLine(
 )
 
 class ArticleService(db: Database) {
-    object ArticleTable : Table() {
+    object ArticleTable : Table("articles") {
         val id = integer("id").autoIncrement()
         val time = datetime("time")
         val contrib = text("contributor")

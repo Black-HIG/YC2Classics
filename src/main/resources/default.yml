@@ -8,7 +8,3 @@ database:
 
 server:
   port: 31234
-
-token:
-  url: "uxmt.mycbxzd.top"
-  path: "index.php"

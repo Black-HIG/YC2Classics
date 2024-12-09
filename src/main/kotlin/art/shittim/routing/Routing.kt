@@ -1,7 +1,5 @@
-package art.shittim
+package art.shittim.routing
 
-import art.shittim.routing.readRoutes
-import art.shittim.routing.writeRoutes
 import io.ktor.server.application.*
 import io.ktor.server.resources.Resources
 import io.ktor.server.routing.*
@@ -11,5 +9,6 @@ fun Application.configureRouting() {
     routing {
         readRoutes()
         writeRoutes()
+        userRoutes()
     }
 }

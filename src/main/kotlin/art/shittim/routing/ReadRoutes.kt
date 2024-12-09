@@ -2,14 +2,20 @@ package art.shittim.routing
 
 import art.shittim.db.ArticleService
 import art.shittim.db.articleService
+import io.ktor.http.*
 import io.ktor.resources.*
-import io.ktor.server.jte.*
+import io.ktor.server.application.*
+import io.ktor.server.pebble.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.logging.*
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format
+import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.selectAll
+import java.time.format.DateTimeFormatter
 
 @Suppress("unused")
 @Resource("/read")
@@ -35,8 +41,16 @@ data class IdArticleLine(
     val contrib: String
 )
 
+@Serializable
+data class PebArticleLine(
+    val line: String,
+    val time: String,
+    val contrib: String
+)
+
 fun Route.readRoutes() {
     get<Read.Json> {
+        application.log.info("Reading json")
         val lines = articleService.dbQuery {
             ArticleService.ArticleTable.selectAll()
                 .map {
@@ -85,6 +99,8 @@ fun Route.readRoutes() {
     }
 
     get<Read.Html> {
+        val formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
+
         val lines = articleService.dbQuery {
             ArticleService.ArticleTable.selectAll()
                 .map {
@@ -96,10 +112,21 @@ fun Route.readRoutes() {
                     )
                 }
                 .toList()
+        }.map {
+            PebArticleLine(
+                it.line,
+                it.time.toJavaLocalDateTime().format(formatter),
+                it.contrib
+            )
         }
+        
+        call.respond(PebbleContent("article.peb", mapOf("lines" to lines)))
+    }
 
-        call.respond(JteContent("article.kte", mapOf("lines" to lines)))
+    get("/line/{id}") {
+        val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
+        val line = articleService.read(id.toInt()) ?: return@get call.respond(HttpStatusCode.NotFound)
+
+        call.respond(line)
     }
 }
-
-

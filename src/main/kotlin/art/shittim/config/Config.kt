@@ -67,11 +67,6 @@ data class CDatabase(
     }
 }
 
-data class TokenAPI(
-    val url: String,
-    val path: String
-)
-
 data class CServer(
     val port: Int
 )
@@ -79,5 +74,4 @@ data class CServer(
 data class CConfig(
     val database: CDatabase,
     val server: CServer,
-    val token: TokenAPI
 )

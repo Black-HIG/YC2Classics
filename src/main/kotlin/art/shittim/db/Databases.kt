@@ -5,6 +5,7 @@ import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.Database
 
 lateinit var articleService: ArticleService
+lateinit var userService: UserService
 
 @Suppress("UnusedReceiverParameter")
 fun Application.configureDatabases() {
@@ -16,4 +17,5 @@ fun Application.configureDatabases() {
     )*/
     val database = config.database.database
     articleService = ArticleService(database)
+    userService = UserService(database)
 }

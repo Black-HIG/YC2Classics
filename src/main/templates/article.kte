@@ -1,4 +1,0 @@
-@import kotlin.collections.List
-@import art.shittim.routing.IdArticleLine
-
-@param lines: List<IdArticleLine>
