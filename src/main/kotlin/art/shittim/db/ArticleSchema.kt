@@ -1,4 +1,4 @@
-package art.shittim
+package art.shittim.db
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable

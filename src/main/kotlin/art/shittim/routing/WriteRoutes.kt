@@ -1,9 +1,8 @@
 package art.shittim.routing
 
-import art.shittim.ArticleLine
-import art.shittim.articleService
+import art.shittim.db.ArticleLine
+import art.shittim.db.articleService
 import io.ktor.http.*
-import io.ktor.resources.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
