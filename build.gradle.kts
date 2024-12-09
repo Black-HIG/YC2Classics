@@ -48,3 +48,20 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
+
+sourceSets {
+    main {
+        resources.srcDir("src/main/templates")
+    }
+}
+
+tasks {
+    processResources {
+        from("src/main/templates")
+        into("build/resources/main/templates")
+    }
+}
+
+kotlin {
+    jvmToolchain(21)
+}

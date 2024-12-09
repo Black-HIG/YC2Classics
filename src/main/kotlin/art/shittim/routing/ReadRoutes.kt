@@ -7,9 +7,11 @@ import io.ktor.server.jte.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.selectAll
 
+@Suppress("unused")
 @Resource("/read")
 class Read {
     @Resource("json")
@@ -26,7 +28,12 @@ class Read {
 }
 
 @Serializable
-data class IdArticleLine(val id: Int, val line: String)
+data class IdArticleLine(
+    val id: Int,
+    val line: String,
+    val time: LocalDateTime,
+    val contrib: String
+)
 
 fun Route.readRoutes() {
     get<Read.Json> {
@@ -35,7 +42,9 @@ fun Route.readRoutes() {
                 .map {
                     IdArticleLine(
                         it[ArticleService.ArticleTable.id],
-                        it[ArticleService.ArticleTable.line]
+                        it[ArticleService.ArticleTable.line],
+                        it[ArticleService.ArticleTable.time],
+                        it[ArticleService.ArticleTable.contrib]
                     )
                 }
                 .toList()
@@ -81,7 +90,9 @@ fun Route.readRoutes() {
                 .map {
                     IdArticleLine(
                         it[ArticleService.ArticleTable.id],
-                        it[ArticleService.ArticleTable.line]
+                        it[ArticleService.ArticleTable.line],
+                        it[ArticleService.ArticleTable.time],
+                        it[ArticleService.ArticleTable.contrib]
                     )
                 }
                 .toList()
