@@ -34,3 +34,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### App Produced Files ###
+data.mv.db
+application-config.yml
