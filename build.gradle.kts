@@ -3,6 +3,11 @@ val h2_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
 val jte_version: String by project
+val hoplite_version: String by project
+val clikt_version: String by project
+val postgre_version: String by project
+val sqlite_version: String by project
+val mysql_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.0"
@@ -11,7 +16,7 @@ plugins {
 }
 
 group = "art.shittim"
-version = "0.0.1"
+version = "0.1.0"
 
 application {
     mainClass.set("art.shittim.ApplicationKt")
@@ -40,7 +45,13 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposed_version")
+    implementation("com.sksamuel.hoplite:hoplite-core:$hoplite_version")
+    implementation("com.sksamuel.hoplite:hoplite-yaml:$hoplite_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:$clikt_version")
     implementation("com.h2database:h2:$h2_version")
+    implementation("org.xerial:sqlite-jdbc:$sqlite_version")
+    implementation("org.postgresql:postgresql:$postgre_version")
+    implementation("mysql:mysql-connector-java:$mysql_version")
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("io.ktor:ktor-server-config-yaml-jvm")
@@ -57,8 +68,7 @@ sourceSets {
 
 tasks {
     processResources {
-        from("src/main/templates")
-        into("build/resources/main/templates")
+
     }
 }
 

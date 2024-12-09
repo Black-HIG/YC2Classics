@@ -36,8 +36,9 @@ suspend fun tokenValidity(token: String): Boolean {
     val response = httpClient.get {
         url {
             protocol = URLProtocol.HTTPS
-            host = "uxmt.mycbxzd.top"
-            path("index.php")
+            host = config.token.url
+
+            path(config.token.path)
 
             parameters.append("api", "check")
             parameters.append("token", token)

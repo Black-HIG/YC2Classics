@@ -1,0 +1,14 @@
+database:
+  type: H2
+  host: ""
+  port: 0
+  name: ""
+  user: "root"
+  password: ""
+
+server:
+  port: 31234
+
+token:
+  url: "uxmt.mycbxzd.top"
+  path: "index.php"
