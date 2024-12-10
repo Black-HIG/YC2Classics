@@ -1,11 +1,15 @@
 package art.shittim.routing
 
-import art.shittim.db.PasswordUser
-import art.shittim.db.userService
+import art.shittim.db.*
+import art.shittim.secure.PAccountModify
+import art.shittim.secure.authenticatePerm
 import io.ktor.http.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.h2.engine.User
+import org.jetbrains.exposed.sql.selectAll
 
 fun Route.userRoutes() {
     get("/user/{name}") {
@@ -15,23 +19,53 @@ fun Route.userRoutes() {
         call.respond(user)
     }
 
-    put("/user/{name}") {
-        val name = call.parameters["name"] ?: return@put call.respond(HttpStatusCode.BadRequest)
-        val id = userService.readIdByName(name)
+    authenticate("auth-jwt") {
+        authenticatePerm(PAccountModify) {
+            get("/user/list") {
+                val users = userService.dbQuery {
+                    UserService.UserTable
+                        .selectAll()
+                        .orderBy(UserService.UserTable.id)
+                        .map {
+                            BeanUser(
+                                it[UserService.UserTable.username],
+                                it[UserService.UserTable.perm]
+                            )
+                        }.toList()
+                }
 
-        val user = call.receive<PasswordUser>()
+                call.respond(users)
+            }
 
-        if(id == null) {
-            userService.create(user)
-        } else {
-            userService.update(id, user)
+            put("/user/{name}") {
+                val name = call.parameters["name"] ?: return@put call.respond(HttpStatusCode.BadRequest)
+                val id = userService.readIdByName(name)
+
+                val user = call.receive<UserData>().let {
+                    PasswordUser(
+                        name,
+                        it.password,
+                        it.perm
+                    )
+                }
+
+                if(id == null) {
+                    userService.create(user)
+                } else {
+                    userService.update(id, user)
+                }
+
+                call.respond(HttpStatusCode.Created)
+            }
+
+            delete("/user/{name}") {
+                val name = call.parameters["name"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                val id = userService.readIdByName(name) ?: return@delete call.respond(HttpStatusCode.NotFound)
+
+                userService.delete(id)
+
+                call.respond(HttpStatusCode.OK)
+            }
         }
-    }
-
-    delete("/user/{name}") {
-        val name = call.parameters["name"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
-        val id = userService.readIdByName(name) ?: return@delete call.respond(HttpStatusCode.NotFound)
-
-        userService.delete(id)
     }
 }

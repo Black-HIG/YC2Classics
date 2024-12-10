@@ -115,8 +115,6 @@ fun Application.configureSecurity() {
                 call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
             }
         }
-
-
     }
 
     routing {
@@ -125,7 +123,7 @@ fun Application.configureSecurity() {
 
             val perm = userService.auth(user.username, user.password)
 
-            if(perm == -1) {
+            if(perm == -1L) {
                 call.respond(HttpStatusCode.Unauthorized, "Invalid username or password")
                 return@post
             }
@@ -135,7 +133,7 @@ fun Application.configureSecurity() {
                 .withIssuer(issuer)
                 .withClaim("username", user.username)
                 .withClaim("perm", perm)
-                .withExpiresAt(Date(System.currentTimeMillis() + 600 * 1000))
+                .withExpiresAt(Date(System.currentTimeMillis() + 6000 * 1000))
                 .sign(Algorithm.HMAC256(secret))
 
             call.respond(hashMapOf("token" to token))

@@ -4,20 +4,29 @@ import art.shittim.logger
 import art.shittim.secure.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
+@Serializable
 data class BeanUser(
     val username: String,
-    val perm: Int
+    val perm: Long
 )
 
+@Serializable
 data class PasswordUser(
     val username: String,
     val password: String,
-    val perm: Int
+    val perm: Long
+)
+
+@Serializable
+data class UserData(
+    val password: String,
+    val perm: Long
 )
 
 class UserService(db: Database) {
@@ -25,7 +34,7 @@ class UserService(db: Database) {
         val id = integer("id").autoIncrement()
         val username = varchar("username", 50).uniqueIndex()
         val password = varchar("password", 300)
-        val perm = integer("perm")
+        val perm = long("perm")
 
         override val primaryKey = PrimaryKey(id)
     }
@@ -74,7 +83,7 @@ class UserService(db: Database) {
         }
     }
 
-    suspend fun auth(name: String, password: String): Int {
+    suspend fun auth(name: String, password: String): Long {
         val row = dbQuery {
             UserTable.selectAll()
                 .where { UserTable.username eq name }

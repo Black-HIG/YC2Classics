@@ -3,8 +3,10 @@ package art.shittim
 import art.shittim.config.CConfig
 import art.shittim.db.configureDatabases
 import art.shittim.routing.configureRouting
+import art.shittim.secure.allPerm
 import art.shittim.secure.configureSecurity
 import com.sksamuel.hoplite.ConfigLoaderBuilder
+import com.sksamuel.hoplite.addFileSource
 import com.sksamuel.hoplite.addResourceSource
 import com.sksamuel.hoplite.addStreamSource
 import io.ktor.server.application.*
@@ -25,8 +27,7 @@ val config by lazy {
     }
 
     ConfigLoaderBuilder.default()
-        .addResourceSource("/application-config.yml", optional = true)
-        .addStreamSource(App::class.java.getResourceAsStream("/default.yml")!!, "yaml")
+        .addFileSource("application-config.yml")
         .build()
         .loadConfigOrThrow<CConfig>()
 }

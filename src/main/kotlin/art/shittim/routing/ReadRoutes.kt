@@ -125,8 +125,11 @@ fun Route.readRoutes() {
 
     get("/line/{id}") {
         val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
-        val line = articleService.read(id.toInt()) ?: return@get call.respond(HttpStatusCode.NotFound)
-
+        val line = try {
+            articleService.read(id.toInt()) ?: return@get call.respond(HttpStatusCode.NotFound)
+        } catch (e: Exception) {
+            return@get call.respond(HttpStatusCode.NotFound)
+        }
         call.respond(line)
     }
 }

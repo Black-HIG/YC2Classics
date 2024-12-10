@@ -36,5 +36,6 @@ out/
 .vscode/
 
 ### App Produced Files ###
+data.db
 data.mv.db
 application-config.yml
