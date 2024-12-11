@@ -1,3 +1,5 @@
+import io.ktor.plugin.features.*
+
 val exposed_version: String by project
 val h2_version: String by project
 val kotlin_version: String by project
@@ -61,6 +63,23 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
     testImplementation("io.ktor:ktor-server-test-host-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+}
+
+ktor {
+    docker {
+        jreVersion.set(JavaVersion.VERSION_21)
+
+        localImageName.set("classics-docker-image")
+        imageTag.set(version.toString())
+
+        externalRegistry.set(
+            DockerImageRegistry.dockerHub(
+                appName = provider { "yc2-classics" },
+                username = providers.environmentVariable("DOCKER_HUB_USERNAME"),
+                password = providers.environmentVariable("DOCKER_HUB_PASSWORD")
+            )
+        )
+    }
 }
 
 sourceSets {
