@@ -1,7 +1,6 @@
 package art.shittim.routing
 
 import art.shittim.db.ArticleLine
-import art.shittim.db.ArticleService.ArticleTable.line
 import art.shittim.db.articleService
 import art.shittim.logger
 import art.shittim.secure.PArticleModify

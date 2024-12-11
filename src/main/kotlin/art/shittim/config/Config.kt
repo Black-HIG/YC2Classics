@@ -2,6 +2,7 @@ package art.shittim.config
 
 import org.jetbrains.exposed.sql.Database
 
+@Suppress("unused")
 enum class DatabaseType {
     MySQL {
         override fun build(
@@ -76,6 +77,7 @@ data class CWeb(
     val header: String
 )
 
+@Suppress("unused")
 data class CConfig(
     val database: CDatabase,
     val server: CServer,

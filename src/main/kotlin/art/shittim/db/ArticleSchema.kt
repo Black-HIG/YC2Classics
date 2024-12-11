@@ -17,6 +17,7 @@ data class ArticleLine(
 )
 
 class ArticleService(db: Database) {
+    @Suppress("ExposedReference")
     object ArticleTable : Table("articles") {
         val id = integer("id").autoIncrement()
         val time = datetime("time")

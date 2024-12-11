@@ -30,6 +30,7 @@ data class UserData(
 )
 
 class UserService(db: Database) {
+    @Suppress("ExposedReference")
     object UserTable : Table("users") {
         val id = integer("id").autoIncrement()
         val username = varchar("username", 50).uniqueIndex()
@@ -69,6 +70,7 @@ class UserService(db: Database) {
         }[UserTable.id]
     }
 
+    @Suppress("unused")
     suspend fun read(id: Int): BeanUser? {
         return dbQuery {
             UserTable.selectAll()

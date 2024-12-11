@@ -9,7 +9,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.h2.engine.User
 import org.jetbrains.exposed.sql.selectAll
 
 fun Route.userRoutes() {
