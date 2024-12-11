@@ -1,6 +1,5 @@
 package art.shittim.secure
 
-import art.shittim.config
 import art.shittim.db.userService
 import art.shittim.logger
 import com.auth0.jwt.JWT

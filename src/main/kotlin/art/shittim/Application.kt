@@ -18,7 +18,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.notExists
 import kotlin.io.path.writeBytes
 
-val config by lazy {
+/*val config by lazy {
     // Create if not exist
 
     Path("config/application-config.yml").let {
@@ -32,12 +32,12 @@ val config by lazy {
         .addFileSource("config/application-config.yml")
         .build()
         .loadConfigOrThrow<CConfig>()
-}
+}*/
 
 fun main() {
     //io.ktor.server.netty.EngineMain.main(args)
 
-    embeddedServer(Netty, port = config.server.port) {
+    embeddedServer(Netty, port = System.getenv("SERVER_PORT").toInt()) {
         module()
     }.start(wait = true)
 }
