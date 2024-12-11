@@ -7,6 +7,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlin.math.log
 
 val PermissionAuthorizationPlugin = createRouteScopedPlugin(
     name = "PermAuthorizationPlugin",
@@ -18,8 +19,9 @@ val PermissionAuthorizationPlugin = createRouteScopedPlugin(
         on(AuthenticationChecked) { call ->
             val principal = call.principal<JWTPrincipal>() ?: return@on call.respond(HttpStatusCode.Unauthorized)
             val perm = principal.payload.getClaim("perm").asLong()
-
-            logger.info("$perm auth with $requiresPerms")
+            val username = principal.payload.getClaim("username").asString()
+            logger.info("User {} with perm {} have requested", username, perm)
+            logger.debug("{} auth with {}", perm, requiresPerms)
 
             var passed = true
 
@@ -31,7 +33,7 @@ val PermissionAuthorizationPlugin = createRouteScopedPlugin(
                 call.respond(HttpStatusCode.Forbidden)
             }
 
-            logger.info("Result: $passed")
+            logger.debug("Result: $passed")
         }
     }
 }

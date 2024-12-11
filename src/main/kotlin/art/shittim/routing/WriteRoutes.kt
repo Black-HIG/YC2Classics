@@ -1,7 +1,9 @@
 package art.shittim.routing
 
 import art.shittim.db.ArticleLine
+import art.shittim.db.ArticleService.ArticleTable.line
 import art.shittim.db.articleService
+import art.shittim.logger
 import art.shittim.secure.PArticleModify
 import art.shittim.secure.authenticatePerm
 import io.ktor.http.*
@@ -37,31 +39,36 @@ fun Route.writeRoutes() {
                 )
 
                 call.respond(HttpStatusCode.Created)
+                logger.info("Created new line {}:{}", line.contrib, line.line)
             }
 
             put("/line/{id}") {
                 val id = call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest)
+                val line = call.receive<RequestArticleLine>().let {
+                    ArticleLine(
+                        it.time ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                        it.contrib,
+                        it.line
+                    )
+                }
 
                 articleService.update(
                     id.toInt(),
-                    call.receive<RequestArticleLine>().let {
-                        ArticleLine(
-                            it.time ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-                            it.contrib,
-                            it.line
-                        )
-                    }
+                    line
                 )
 
                 call.respond(HttpStatusCode.OK)
+                logger.info("Updated line {}, new data: {}:{}", id, line.contrib, line.line)
             }
 
             delete("/line/{id}") {
                 val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
 
+                val line = articleService.read(id.toInt()) ?: return@delete call.respond(HttpStatusCode.NotFound)
                 articleService.delete(id.toInt())
 
                 call.respond(HttpStatusCode.OK)
+                logger.info("Removed line {}, original data: {}:{}", id, line.contrib, line.line)
             }
         }
     }

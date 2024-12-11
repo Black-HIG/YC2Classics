@@ -2,6 +2,7 @@ package art.shittim.routing
 
 import art.shittim.db.ArticleService
 import art.shittim.db.articleService
+import art.shittim.logger
 import io.ktor.http.*
 import io.ktor.resources.*
 import io.ktor.server.application.*
@@ -50,7 +51,6 @@ data class PebArticleLine(
 
 fun Route.readRoutes() {
     get<Read.Json> {
-        application.log.info("Reading json")
         val lines = articleService.dbQuery {
             ArticleService.ArticleTable.selectAll()
                 .map {

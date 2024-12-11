@@ -1,6 +1,7 @@
 package art.shittim.routing
 
 import art.shittim.db.*
+import art.shittim.logger
 import art.shittim.secure.PAccountModify
 import art.shittim.secure.authenticatePerm
 import io.ktor.http.*
@@ -51,8 +52,10 @@ fun Route.userRoutes() {
 
                 if(id == null) {
                     userService.create(user)
+                    logger.info("Created new user named {} with perm {}", name, user.perm)
                 } else {
                     userService.update(id, user)
+                    logger.info("Updated user named {} with perm {}", name, user.perm)
                 }
 
                 call.respond(HttpStatusCode.Created)

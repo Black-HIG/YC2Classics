@@ -13,6 +13,7 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.logging.*
+import org.slf4j.LoggerFactory
 import kotlin.io.path.Path
 import kotlin.io.path.notExists
 import kotlin.io.path.writeBytes
@@ -43,7 +44,7 @@ fun main() {
 lateinit var logger: Logger
 
 fun Application.module() {
-    logger = log
+    logger = LoggerFactory.getLogger("Classics")
     configureSecurity()
     configureHTTP()
     configureSerialization()

@@ -2,6 +2,7 @@ package art.shittim.secure
 
 import art.shittim.config
 import art.shittim.db.userService
+import art.shittim.logger
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import de.mkammerer.argon2.Argon2
@@ -137,6 +138,7 @@ fun Application.configureSecurity() {
                 .sign(Algorithm.HMAC256(secret))
 
             call.respond(hashMapOf("token" to token))
+            logger.info("User {} just logged in", user.username)
         }
     }
 }
