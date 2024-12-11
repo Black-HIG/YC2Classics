@@ -23,6 +23,7 @@ val config by lazy {
 
     Path("config/application-config.yml").let {
         if(it.notExists()) {
+            it.toFile().mkdirs()
             it.writeBytes(App::class.java.getResourceAsStream("/default.yml")!!.readBytes())
         }
     }
