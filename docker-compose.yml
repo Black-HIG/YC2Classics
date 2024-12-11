@@ -1,5 +1,7 @@
 services:
   web:
+    env_file:
+      - .env
     build: .
     ports:
       - "25611:31234"
