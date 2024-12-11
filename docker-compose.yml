@@ -1,0 +1,10 @@
+services:
+  web:
+    build: .
+    ports:
+      - "25611:31234"
+    volumes:
+      - D:/config:/app/config/
+    environment:
+      - HTTP_PROXY=http://127.0.0.1:7890
+      - HTTPS_PROXY=http://127.0.0.1:7890

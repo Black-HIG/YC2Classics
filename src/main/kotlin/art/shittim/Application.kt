@@ -21,14 +21,14 @@ import kotlin.io.path.writeBytes
 val config by lazy {
     // Create if not exist
 
-    Path("application-config.yml").let {
+    Path("config/application-config.yml").let {
         if(it.notExists()) {
             it.writeBytes(App::class.java.getResourceAsStream("/default.yml")!!.readBytes())
         }
     }
 
     ConfigLoaderBuilder.default()
-        .addFileSource("application-config.yml")
+        .addFileSource("config/application-config.yml")
         .build()
         .loadConfigOrThrow<CConfig>()
 }

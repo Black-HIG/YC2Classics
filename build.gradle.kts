@@ -30,6 +30,16 @@ application {
 
 repositories {
     mavenCentral()
+
+    maven {
+        name = "Tencent"
+        url = uri("https://mirrors.cloud.tencent.com/nexus/repository/maven-public/")
+    }
+
+    maven {
+        name = "Aliyun"
+        url = uri("https://maven.aliyun.com/repository/central")
+    }
 }
 
 dependencies {
