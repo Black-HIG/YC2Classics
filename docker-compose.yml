@@ -4,6 +4,4 @@ services:
       - .env
     build: .
     ports:
-      - "25611:31234"
-    volumes:
-      - D:/config:/app/config/
+      - "80:8080"
