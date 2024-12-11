@@ -58,6 +58,7 @@ fun argon2verify(data: String, source: String) = argon2.verify(data, source.toCh
 
 fun String.hashed() = argon2hash(this)
 
+@Suppress("unused")
 @Deprecated(message = "Use jwt rather than token api", level = DeprecationLevel.HIDDEN)
 suspend fun tokenValidity(token: String): Boolean {
     val response = httpClient.get {
@@ -81,7 +82,7 @@ suspend fun tokenValidity(token: String): Boolean {
     }
 }
 
-const val secret = "yc2_waterstarlake"
+val secret = System.getenv("JWT_SECRET") ?: "yc2_waterstarlake"
 const val issuer = "classics.shittim.art"
 const val audience = "classics.shittim.art"
 const val myRealm = "YC2 Classics Access"
