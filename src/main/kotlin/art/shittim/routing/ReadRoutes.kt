@@ -2,17 +2,13 @@ package art.shittim.routing
 
 import art.shittim.db.ArticleService
 import art.shittim.db.articleService
-import art.shittim.logger
 import io.ktor.http.*
 import io.ktor.resources.*
-import io.ktor.server.application.*
 import io.ktor.server.pebble.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.logging.*
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.format
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.selectAll
@@ -128,6 +124,10 @@ fun Route.readRoutes() {
                 "footer" to System.getenv("WEB_FOOTER")
             )
         ))
+    }
+
+    get("/") {
+        call.respondRedirect("/read/html")
     }
 
     get("/line/{id}") {
