@@ -71,7 +71,13 @@ data class CServer(
     val port: Int
 )
 
+data class CWeb(
+    val footer: String,
+    val header: String
+)
+
 data class CConfig(
     val database: CDatabase,
     val server: CServer,
+    val web: CWeb
 )

@@ -8,3 +8,7 @@ database:
 
 server:
   port: 31234
+
+web:
+  footer: "&copy;  zzsz_yc2"
+  header: "zzsz yc2 classics"

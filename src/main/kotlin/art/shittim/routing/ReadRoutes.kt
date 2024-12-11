@@ -1,5 +1,6 @@
 package art.shittim.routing
 
+import art.shittim.config
 import art.shittim.db.ArticleService
 import art.shittim.db.articleService
 import art.shittim.logger
@@ -120,7 +121,14 @@ fun Route.readRoutes() {
             )
         }
         
-        call.respond(PebbleContent("article.peb", mapOf("lines" to lines)))
+        call.respond(PebbleContent(
+            "article.peb",
+            mapOf(
+                "lines" to lines,
+                "header" to config.web.header,
+                "footer" to config.web.footer
+            )
+        ))
     }
 
     get("/line/{id}") {

@@ -133,7 +133,7 @@
     </style>
 </head>
 <body>
-    <header>郑州四中英才二班典籍</header>
+    <header>{# @pebvariable name="header" type="string" #}{{ header }}</header>
     <button class="theme-button">颜色选择</button>
     <div class="theme-popup">
         <div class="theme-color" style="background-color: #28a745;" data-page-bg="#28a745" data-entry-bg="#d4edda"></div>
@@ -143,11 +143,11 @@
     </div>
     <div class="container"></div>
     <div class="pagination"></div>
-    <footer style="user-select: none;">&copy; 郑州市第四高级中学英才二班</footer>
+    <footer style="user-select: none;">{# @pebvariable name="footer" type="string" #}{{ footer }}</footer>
     <script>
         let data = {"data": []}
 
-        {% for line in lines %}
+        {# @pebvariable name="lines" type="java.util.List<art.shittim.routing.IdArticleLine>" #}{% for line in lines %}
             data["data"].push(
                 {
                     "time": "{{ line.time }}",
