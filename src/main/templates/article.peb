@@ -143,7 +143,6 @@
     </div>
     <div class="container"></div>
     <div class="pagination"></div>
-    <footer style="user-select: none">TODO : 翻页逻辑(blackhig写了一坨屎)</footer>
     <footer style="user-select: none;">&copy; 郑州市第四高级中学英才二班</footer>
     <script>
         //const data = {"data":[{"time":"2024-01-17 09:30:55","content":"参加了学校组织的义务劳动。","contributor":null},{"time":"2024-09-01 09:30:55","content":"分享了一本好书。","contributor":"学生A"},{"time":"2024-11-14 09:30:55","content":"完成了一幅精美的手工作品。","contributor":"学生D"},{"time":"2024-02-12 09:30:55","content":"参加了学校组织的义务劳动。","contributor":"学生D"},{"time":"2024-08-18 09:30:55","content":"提出了一个非常有趣的问题。","contributor":"学生B"}]};
@@ -193,6 +192,14 @@
 
         function renderPagination() {
             pagination.innerHTML = '';
+            const home = document.createElement('a');
+            home.textContent = '首页';
+            home.href = '#';
+            home.onclick = () => {
+                currentPage = 1;
+                renderPage(currentPage);
+            };
+            pagination.append(home);
             const prevLink = document.createElement('a');
             prevLink.textContent = '上一页';
             prevLink.href = '#';
@@ -204,31 +211,8 @@
                 return false;
             };
             pagination.appendChild(prevLink);
-            let l = Math.min(3, currentPage - 1);
-            if(Math.min(currentPage + (4 - l), totalPages - 3) < totalPages - 3) {
-                for (let i = Math.max(currentPage - 3, 1); i <= Math.min(currentPage + (4 - l), totalPages - 3); i++) {
-                    const pageLink = document.createElement('a');
-                    pageLink.textContent = i.toString();
-                    pageLink.href = '#';
-                    if (i === currentPage) {
-                        pageLink.style.fontWeight = '900';
-                    }
-                    pageLink.onclick = () => {
-                        currentPage = i;
-                        renderPage(currentPage);
-                        return false;
-                    };
-                    pagination.appendChild(pageLink);
-                }
-                const pageLink = document.createElement('a');
-                pageLink.textContent = "..."
-                pageLink.href = "#";
-                pageLink.onclick = () => {
-                    renderPage(currentPage);
-                    return false;
-                };
-                pagination.appendChild(pageLink);
-                for(let i = Math.min(Math.max(currentPage, totalPages - 3), totalPages) + 1; i <= totalPages; i++) {
+            if(totalPages <= 10) {
+                for(let i = 1; i <= totalPages; i++) {
                     const pageLink = document.createElement('a');
                     pageLink.textContent = i.toString();
                     pageLink.href = '#';
@@ -243,8 +227,19 @@
                     pagination.appendChild(pageLink);
                 }
             } else {
-                let f = totalPages - currentPage + 1;
-                for(let i = Math.max(1, currentPage - (9 - f)); i <= totalPages; i++) {
+                let lef = 0, rig = 0;
+                if(currentPage <= 5) {
+                    lef = currentPage - 1;
+                    rig = 10 - lef;
+                }
+                else if(currentPage >= totalPages - 5) {
+                    rig = totalPages - currentPage
+                    lef = 10 - rig;
+                } else {
+                    lef = 5
+                    rig = 5;
+                }
+                for(let i = currentPage - lef; i <= currentPage + rig; i++) {
                     const pageLink = document.createElement('a');
                     pageLink.textContent = i.toString();
                     pageLink.href = '#';
@@ -270,6 +265,14 @@
                 return false;
             };
             pagination.appendChild(nextLink);
+            const end = document.createElement('a');
+            end.textContent = '末页';
+            end.href = '#';
+            end.onclick = () => {
+                currentPage = totalPages;
+                renderPage(currentPage);
+            }
+            pagination.appendChild(end)
         }
 
         function renderPage(pageNumber) {
@@ -291,6 +294,20 @@
         }
 
         loadTheme();
+        renderPage(currentPage);
+
+        const params = new URLSearchParams(window.location.search);
+
+        if(params.has('page')) {
+            currentPage = parseInt(params.get('page'));
+            if(currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            if(currentPage < 1) {
+                currentPage = 1;
+            }
+        }
+
         renderPage(currentPage);
     </script>
 </body>
