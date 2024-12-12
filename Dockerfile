@@ -20,7 +20,7 @@ RUN gradle buildFatJar --no-daemon
 
 # Stage 3: Create the Runtime Image
 FROM amazoncorretto:21 AS runtime
-EXPOSE 31234
+EXPOSE 8080
 RUN mkdir /app
 COPY --from=build /home/gradle/src/build/libs/*.jar /app/classics-docker.jar
 ENTRYPOINT ["java","-jar","/app/classics-docker.jar"]

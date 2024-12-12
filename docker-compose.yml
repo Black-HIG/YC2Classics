@@ -4,19 +4,16 @@ services:
       - .env
     build: .
     ports:
-      - "80:8080"
-    depends_on:
-      db:
-        condition: service_healthy
+      - "8080:8080"
   db:
     image: postgres
     volumes:
-      - /data/github/classics/db
+      - /classics/db:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: classics_database
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "9999:9999"
+      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s

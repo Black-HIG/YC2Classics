@@ -9,7 +9,7 @@ lateinit var userService: UserService
 @Suppress("UnusedReceiverParameter")
 fun Application.configureDatabases() {
     val database = Database.connect(
-        url = "jdbc:postgresql://localhost:9999/classics_database",
+        url = "jdbc:postgresql://localhost:5432/classics_database",
         user = "postgres",
         driver = "org.postgresql.Driver",
         password = "",

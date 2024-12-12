@@ -10,15 +10,11 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RequestArticleLine(
-    var time: LocalDateTime?,
+    var time: String?,
     val contrib: String,
     val line: String
 )
@@ -31,7 +27,7 @@ fun Route.writeRoutes() {
 
                 articleService.create(
                     ArticleLine(
-                        line.time ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                        line.time ?: "不详",
                         line.contrib,
                         line.line
                     )
@@ -45,7 +41,7 @@ fun Route.writeRoutes() {
                 val id = call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val line = call.receive<RequestArticleLine>().let {
                     ArticleLine(
-                        it.time ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                        it.time ?: "不详",
                         it.contrib,
                         it.line
                     )

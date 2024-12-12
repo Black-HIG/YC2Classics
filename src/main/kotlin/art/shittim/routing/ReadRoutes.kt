@@ -8,11 +8,8 @@ import io.ktor.server.pebble.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.selectAll
-import java.time.format.DateTimeFormatter
 
 @Suppress("unused")
 @Resource("/read")
@@ -34,7 +31,7 @@ class Read {
 data class IdArticleLine(
     val id: Int,
     val line: String,
-    val time: LocalDateTime,
+    val time: String,
     val contrib: String
 )
 
@@ -95,8 +92,6 @@ fun Route.readRoutes() {
     }
 
     get<Read.Html> {
-        val formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
-
         val lines = articleService.dbQuery {
             ArticleService.ArticleTable.selectAll()
                 .map {
@@ -111,7 +106,7 @@ fun Route.readRoutes() {
         }.map {
             PebArticleLine(
                 it.line,
-                it.time.toJavaLocalDateTime().format(formatter),
+                it.time,
                 it.contrib
             )
         }

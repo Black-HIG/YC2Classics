@@ -1,17 +1,15 @@
 package art.shittim.db
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @Serializable
 data class ArticleLine(
-    val time: LocalDateTime,
+    val time: String,
     val contrib: String,
     val line: String
 )
@@ -20,7 +18,7 @@ class ArticleService(db: Database) {
     @Suppress("ExposedReference")
     object ArticleTable : Table("articles") {
         val id = integer("id").autoIncrement()
-        val time = datetime("time")
+        val time = text("time")
         val contrib = text("contributor")
         val line = text("line")
 

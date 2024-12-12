@@ -39,3 +39,4 @@ out/
 data.db
 data.mv.db
 application-config.yml
+.env
