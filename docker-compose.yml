@@ -5,10 +5,13 @@ services:
     build: .
     ports:
       - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
   db:
     image: postgres
     volumes:
-      - /classics/db:/var/lib/postgresql/data
+      - ./classics/db:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: classics_database
       POSTGRES_HOST_AUTH_METHOD: trust

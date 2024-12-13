@@ -12,7 +12,7 @@ fun Application.configureDatabases() {
         url = "jdbc:postgresql://localhost:5432/classics_database",
         user = "postgres",
         driver = "org.postgresql.Driver",
-        password = "",
+        password = "password",
     )
     //val database = config.database.database
     articleService = ArticleService(database)
