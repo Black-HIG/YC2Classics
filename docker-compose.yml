@@ -4,10 +4,12 @@ services:
       - .env
     build: .
     ports:
-      - "8080:8080"
+      - "25611:31234"
     depends_on:
       db:
         condition: service_healthy
+    restart: always
+
   db:
     image: postgres
     volumes:
@@ -15,8 +17,9 @@ services:
     environment:
       POSTGRES_DB: classics_database
       POSTGRES_HOST_AUTH_METHOD: trust
-    ports:
-      - "5432:5432"
+    # ports:
+       - "5432:5432"  # 默认映射 PostgreSQL 的 5432 端口到主机（注释后将不会向外暴露端口）本行可注释
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
+    restart: always
