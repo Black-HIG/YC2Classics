@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>郑州四中英才二班典籍</title>
+    <!--suppress CssUnusedSymbol -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background: var(--page-bg-gradient, linear-gradient(135deg, #f8e1e7, #fcfafb));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s ease;
+        }
+        header {
+            background: transparent;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+            font-size: 1.5em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .theme-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+        }
+        .theme-popup {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+        .theme-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: inline-block;
+            margin: 5px;
+        }
+        .container {
+            max-width: 800px;
+            min-width: 300px;
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+        }
+        .entry {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 15px;
+            background: var(--entry-bg-color, #e7f3ff);
+            border-radius: 12px;
+            word-wrap: break-word;
+            overflow: hidden;
+            position: relative;
+            min-height: 40px;
+            margin-bottom: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .entry:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .entry-time {
+            position: absolute;
+            top: 5px;
+            left: 15px;
+            font-size: 0.8em;
+            color: #aaa;
+        }
+        .entry-contributor {
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            font-size: 0.8em;
+            color: #aaa;
+        }
+        .pagination {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .pagination a {
+            text-decoration: none;
+            color: #007BFF;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            margin: 0 5px;
+            border-radius: 8px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .pagination a:hover {
+            background-color: #007BFF;
+            color: white;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background: transparent;
+            color: white;
+            margin-top: auto;
+        }
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>{# @pebvariable name="header" type="string" #}{{ header }}</header>
+    <button class="theme-button">颜色选择</button>
+    <div class="theme-popup">
+        <div class="theme-color" style="background-color: #28a745;" data-page-bg="#28a745" data-entry-bg="#d4edda"></div>
+        <div class="theme-color" style="background-color: #007BFF;" data-page-bg="#007BFF" data-entry-bg="#cce5ff"></div>
+        <div class="theme-color" style="background-color: #ffc107;" data-page-bg="#ffc107" data-entry-bg="#fff3cd"></div>
+        <div class="theme-color" style="background-color: #ff69b4;" data-page-bg="#ff69b4" data-entry-bg="#ffe4e1"></div>
+    </div>
+    <div class="container"></div>
+    <div class="pagination"></div>
+    <footer style="user-select: none;">{# @pebvariable name="footer" type="string" #}{{ footer }}</footer>
+    <script>
+        let data = {"data": []}
+
+        {# @pebvariable name="lines" type="java.util.List<art.shittim.routing.IdArticleLine>" #}{% for line in lines %}
+            data["data"].push(
+                {
+                    "time": "{{ line.time }}",
+                    "content": "{{ line.line }}",
+                    "contributor": "{{ line.contrib }}"
+                }
+            )
+        {% endfor %}
+
+        const itemsPerPage = 7;
+        let currentPage = 1;
+        const totalPages = Math.ceil(data.data.length / itemsPerPage);
+        const container = document.querySelector('.container');
+        const pagination = document.querySelector('.pagination');
+        const themeButton = document.querySelector('.theme-button');
+        const themePopup = document.querySelector('.theme-popup');
+        const themeColors = document.querySelectorAll('.theme-color');
+
+        function loadTheme() {
+            const savedPageBg = localStorage.getItem('pageBgColor') || '#007BFF';
+            const savedEntryBg = localStorage.getItem('entryBgColor') || '#e7f3ff';
+            document.body.style.setProperty('--page-bg-gradient', `linear-gradient(135deg, ${savedPageBg}, #f9f9f9)`);
+            document.documentElement.style.setProperty('--entry-bg-color', savedEntryBg);
+            themeButton.style.backgroundColor = savedPageBg;
+        }
+
+        themeButton.addEventListener('click', () => {
+            themePopup.style.display = themePopup.style.display === 'block' ? 'none' : 'block';
+        });
+
+        themeColors.forEach(color => {
+            color.addEventListener('click', () => {
+                const pageBg = color.getAttribute('data-page-bg');
+                const entryBg = color.getAttribute('data-entry-bg');
+                localStorage.setItem('pageBgColor', pageBg);
+                localStorage.setItem('entryBgColor', entryBg);
+                loadTheme();
+                themePopup.style.display = 'none';
+            });
+        });
+
+        function renderPagination() {
+            pagination.innerHTML = '';
+            const home = document.createElement('a');
+            home.textContent = '首页';
+            home.href = '#';
+            home.onclick = () => {
+                currentPage = 1;
+                renderPage(currentPage);
+            };
+            pagination.append(home);
+            const prevLink = document.createElement('a');
+            prevLink.textContent = '上一页';
+            prevLink.href = '#';
+            prevLink.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderPage(currentPage);
+                }
+                return false;
+            };
+            pagination.appendChild(prevLink);
+            if(totalPages <= 10) {
+                for(let i = 1; i <= totalPages; i++) {
+                    const pageLink = document.createElement('a');
+                    pageLink.textContent = i.toString();
+                    pageLink.href = '#';
+                    if (i === currentPage) {
+                        pageLink.style.fontWeight = '900';
+                    }
+                    pageLink.onclick = () => {
+                        currentPage = i;
+                        renderPage(currentPage);
+                        return false;
+                    };
+                    pagination.appendChild(pageLink);
+                }
+            } else {
+                let lef = 0, rig = 0;
+                if(currentPage <= 5) {
+                    lef = currentPage - 1;
+                    rig = 10 - lef;
+                }
+                else if(currentPage >= totalPages - 5) {
+                    rig = totalPages - currentPage
+                    lef = 10 - rig;
+                } else {
+                    lef = 5
+                    rig = 5;
+                }
+                for(let i = currentPage - lef; i <= currentPage + rig; i++) {
+                    const pageLink = document.createElement('a');
+                    pageLink.textContent = i.toString();
+                    pageLink.href = '#';
+                    if (i === currentPage) {
+                        pageLink.style.fontWeight = '900';
+                    }
+                    pageLink.onclick = () => {
+                        currentPage = i;
+                        renderPage(currentPage);
+                        return false;
+                    };
+                    pagination.appendChild(pageLink);
+                }
+            }
+            const nextLink = document.createElement('a');
+            nextLink.textContent = '下一页';
+            nextLink.href = '#';
+            nextLink.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderPage(currentPage);
+                }
+                return false;
+            };
+            pagination.appendChild(nextLink);
+            const end = document.createElement('a');
+            end.textContent = '末页';
+            end.href = '#';
+            end.onclick = () => {
+                currentPage = totalPages;
+                renderPage(currentPage);
+            }
+            pagination.appendChild(end)
+        }
+
+        function renderPage(pageNumber) {
+            container.innerHTML = '';
+            const start = (pageNumber - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageEntries = data.data.slice(start, end);
+            pageEntries.forEach(entry => {
+                const div = document.createElement('div');
+                div.className = 'entry';
+                div.innerHTML = `
+                    <span class="entry-time">${entry.time}</span>
+                    <span class="entry-contributor">${entry.contributor || ''}</span>
+                    <div>${entry.content}</div>
+                `;
+                container.appendChild(div);
+            });
+            renderPagination();
+        }
+
+        loadTheme();
+        renderPage(currentPage);
+
+        const params = new URLSearchParams(window.location.search);
+
+        if(params.has('page')) {
+            currentPage = parseInt(params.get('page'));
+            if(currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            if(currentPage < 1) {
+                currentPage = 1;
+            }
+        }
+
+        renderPage(currentPage);
+    </script>
+</body>
+</html>
