@@ -1,9 +1,14 @@
+<Antartifact identifier="latex-html-template" type="text/html" title="LaTeX and HTML Rendering Template">
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>郑州四中英才二班典籍</title>
+    <!-- KaTeX 引入 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
     <!--suppress CssUnusedSymbol -->
     <style>
         body {
@@ -283,12 +288,31 @@
             pageEntries.forEach(entry => {
                 const div = document.createElement('div');
                 div.className = 'entry';
+                
+                // 创建临时容器来处理内容
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = entry.content; // 允许HTML标签渲染
+                
                 div.innerHTML = `
                     <span class="entry-time">${entry.time}</span>
                     <span class="entry-contributor">${entry.contributor || ''}</span>
-                    <div>${entry.content}</div>
+                    <div>${tempDiv.innerHTML}</div>
                 `;
+                
                 container.appendChild(div);
+                
+                // 渲染该条目中的LaTeX公式
+                renderMathInElement(div, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},  // 块级公式
+                        {left: "$", right: "$", display: false},   // 行内公式
+                        {left: "\\[", right: "\\]", display: true},  // 兼容其他块级公式写法
+                        {left: "\\(", right: "\\)", display: false}  // 兼容其他行内公式写法
+                    ],
+                    throwOnError: false, // 发生错误时不抛出异常
+                    errorColor: '#cc0000', // 错误时显示红色
+                    strict: false // 非严格模式，容错性更好
+                });
             });
             renderPagination();
         }
@@ -312,3 +336,4 @@
     </script>
 </body>
 </html>
+</Antartifact>
