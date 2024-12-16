@@ -85,7 +85,6 @@
             transition: transform 0.3s, box-shadow 0.3s;
         }
         .entry:hover {
-            transform: scale(1.15);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         .entry-time {
@@ -142,7 +141,22 @@
             cursor: pointer;
         }
         .entry.sensitive:hover {
+            filter: blur(5px);
+        }
+        .sensitive-warning {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
             filter: none;
+        }
+        .entry.sensitive:hover .sensitive-warning {
+            display: block;
         }
     </style>
 </head>
@@ -310,17 +324,27 @@
                 }
                 let entryContent = `
                     <span class="entry-time">${entry.time}</span>
-                    <span class="entry-contributor">${entry.contributor || ''}</span>
+                    <span class="entry-contributor">${entry.contrib || ''}</span>
                     <div>${entry.content}</div>
                 `;
                 if (entry.unsure) {
                     entryContent += `<div class="unsure-warning">本条目真实性有待考究</div>`;
+                }
+                if (entry.sensitive) {
+                    entryContent += `
+                        <div class="sensitive-warning">
+                            Content warning: Sensitive Content<br>
+                            web admin labeled this post as containing Sensitive Content.<br>
+                            Please click to view
+                        </div>
+                    `;
                 }
                 div.innerHTML = entryContent;
 
                 if (entry.sensitive) {
                     div.addEventListener('click', function() {
                         this.classList.remove('sensitive');
+                        this.querySelector('.sensitive-warning').style.display = 'none';
                     });
                 }
 
