@@ -153,7 +153,9 @@
                 {
                     "time": "{{ line.time }}",
                     "content": "{{ line.line }}",
-                    "contributor": "{{ line.contrib }}"
+                    "contributor": "{{ line.contrib }}",
+                    "unsure": "{{ line.unsure }}",
+                    "sensitive": "{{ line.sensitive }}"
                 }
             )
         {% endfor %}
