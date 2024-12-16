@@ -85,7 +85,6 @@
             transition: transform 0.3s, box-shadow 0.3s;
         }
         .entry:hover {
-            transform: scale(1.15);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         .entry-time {
@@ -142,7 +141,21 @@
             cursor: pointer;
         }
         .entry.sensitive:hover {
-            filter: none;
+            filter: blur(5px);
+        }
+        .sensitive-warning {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        .entry.sensitive:hover .sensitive-warning {
+            display: block;
         }
     </style>
 </head>
@@ -161,11 +174,11 @@
     <script>
         // 示例数据，包含unsure和sensitive标志
         const data = {"data":[
-            {"time":"2024-01-17 09:30:55","content":"参加了学校组织的义务劳动。","contributor":null,"unsure":false,"sensitive":false},
-            {"time":"2024-09-01 09:30:55","content":"分享了一本好书。","contributor":"学生A","unsure":true,"sensitive":false},
-            {"time":"2024-11-14 09:30:55","content":"完成了一幅精美的手工作品。","contributor":"学生D","unsure":false,"sensitive":true},
-            {"time":"2024-02-12 09:30:55","content":"参加了学校组织的义务劳动。","contributor":"学生D","unsure":false,"sensitive":false},
-            {"time":"2024-08-18 09:30:55","content":"提出了一个非常有趣的问题。","contributor":"学生B","unsure":true,"sensitive":true}
+            {"time":"2024-01-17 09:30:55","content":"参加了学校组织的义务劳动。","contrib":null,"unsure":false,"sensitive":false},
+            {"time":"2024-09-01 09:30:55","content":"分享了一本好书。","contrib":"学生A","unsure":true,"sensitive":false},
+            {"time":"2024-11-14 09:30:55","content":"完成了一幅精美的手工作品。","contrib":"学生D","unsure":false,"sensitive":true},
+            {"time":"2024-02-12 09:30:55","content":"参加了学校组织的义务劳动。","contrib":"学生D","unsure":false,"sensitive":false},
+            {"time":"2024-08-18 09:30:55","content":"提出了一个非常有趣的问题。","contrib":"学生B","unsure":true,"sensitive":true}
         ]};
         const itemsPerPage = 7;
         let currentPage = 1;
@@ -304,17 +317,27 @@
                 }
                 let entryContent = `
                     <span class="entry-time">${entry.time}</span>
-                    <span class="entry-contributor">${entry.contributor || ''}</span>
+                    <span class="entry-contributor">${entry.contrib || ''}</span>
                     <div>${entry.content}</div>
                 `;
                 if (entry.unsure) {
                     entryContent += `<div class="unsure-warning">本条目真实性有待考究</div>`;
+                }
+                if (entry.sensitive) {
+                    entryContent += `
+                        <div class="sensitive-warning">
+                            Content warning: Sensitive Content<br>
+                            web admin labeled this post as containing Sensitive Content.<br>
+                            Please click to view
+                        </div>
+                    `;
                 }
                 div.innerHTML = entryContent;
                 
                 if (entry.sensitive) {
                     div.addEventListener('click', function() {
                         this.classList.remove('sensitive');
+                        this.querySelector('.sensitive-warning').style.display = 'none';
                     });
                 }
                 
