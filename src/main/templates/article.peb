@@ -131,10 +131,23 @@
                 width: 90%;
             }
         }
+        /* 新增样式 */
+        .entry .unsure-warning {
+            color: #ff9800;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        .entry.sensitive {
+            filter: blur(5px);
+            cursor: pointer;
+        }
+        .entry.sensitive:hover {
+            filter: none;
+        }
     </style>
 </head>
 <body>
-    <header>{# @pebvariable name="header" type="string" #}{{ header }}</header>
+    <header>郑州四中英才二班典籍</header>
     <button class="theme-button">颜色选择</button>
     <div class="theme-popup">
         <div class="theme-color" style="background-color: #28a745;" data-page-bg="#28a745" data-entry-bg="#d4edda"></div>
@@ -144,7 +157,7 @@
     </div>
     <div class="container"></div>
     <div class="pagination"></div>
-    <footer style="user-select: none;">{# @pebvariable name="footer" type="string" #}{{ footer }}</footer>
+    <footer style="user-select: none;">&copy; 郑州市第四高级中学英才二班</footer>
     <script>
         let data = {"data": []}
 
@@ -154,8 +167,8 @@
                     "time": "{{ line.time }}",
                     "content": "{{ line.line }}",
                     "contributor": "{{ line.contrib }}",
-                    "unsure": "{{ line.unsure }}",
-                    "sensitive": "{{ line.sensitive }}"
+                    "unsure": {{ line.unsure }},
+                    "sensitive": {{ line.sensitive }}
                 }
             )
         {% endfor %}
@@ -169,6 +182,7 @@
         const themePopup = document.querySelector('.theme-popup');
         const themeColors = document.querySelectorAll('.theme-color');
 
+        // 加载主题
         function loadTheme() {
             const savedPageBg = localStorage.getItem('pageBgColor') || '#007BFF';
             const savedEntryBg = localStorage.getItem('entryBgColor') || '#e7f3ff';
@@ -177,10 +191,12 @@
             themeButton.style.backgroundColor = savedPageBg;
         }
 
+        // 主题按钮点击事件
         themeButton.addEventListener('click', () => {
             themePopup.style.display = themePopup.style.display === 'block' ? 'none' : 'block';
         });
 
+        // 颜色选择事件
         themeColors.forEach(color => {
             color.addEventListener('click', () => {
                 const pageBg = color.getAttribute('data-page-bg');
@@ -192,6 +208,7 @@
             });
         });
 
+        // 渲染分页
         function renderPagination() {
             pagination.innerHTML = '';
             const home = document.createElement('a');
@@ -200,6 +217,7 @@
             home.onclick = () => {
                 currentPage = 1;
                 renderPage(currentPage);
+                return false;
             };
             pagination.append(home);
             const prevLink = document.createElement('a');
@@ -273,10 +291,12 @@
             end.onclick = () => {
                 currentPage = totalPages;
                 renderPage(currentPage);
+                return false;
             }
             pagination.appendChild(end)
         }
 
+        // 渲染页面
         function renderPage(pageNumber) {
             container.innerHTML = '';
             const start = (pageNumber - 1) * itemsPerPage;
@@ -285,21 +305,36 @@
             pageEntries.forEach(entry => {
                 const div = document.createElement('div');
                 div.className = 'entry';
-                div.innerHTML = `
+                if (entry.sensitive) {
+                    div.classList.add('sensitive');
+                }
+                let entryContent = `
                     <span class="entry-time">${entry.time}</span>
                     <span class="entry-contributor">${entry.contributor || ''}</span>
                     <div>${entry.content}</div>
                 `;
+                if (entry.unsure) {
+                    entryContent += `<div class="unsure-warning">本条目真实性有待考究</div>`;
+                }
+                div.innerHTML = entryContent;
+
+                if (entry.sensitive) {
+                    div.addEventListener('click', function() {
+                        this.classList.remove('sensitive');
+                    });
+                }
+
                 container.appendChild(div);
             });
             renderPagination();
         }
 
+        // 加载主题并渲染初始页面
         loadTheme();
         renderPage(currentPage);
 
+        // 处理URL参数
         const params = new URLSearchParams(window.location.search);
-
         if(params.has('page')) {
             currentPage = parseInt(params.get('page'));
             if(currentPage > totalPages) {
@@ -308,9 +343,8 @@
             if(currentPage < 1) {
                 currentPage = 1;
             }
+            renderPage(currentPage);
         }
-
-        renderPage(currentPage);
     </script>
 </body>
 </html>
