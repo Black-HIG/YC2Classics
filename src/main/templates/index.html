@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>郑州四中英才二班典籍</title>
-    <!--suppress CssUnusedSymbol -->
+    <!--suppress CssUnusedSymbol, CssUnresolvedCustomProperty, CssUnresolvedCustomProperty -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -69,25 +69,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 16px;
         }
-        .entry {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 15px;
-            background: var(--entry-bg-color, #e7f3ff);
-            border-radius: 12px;
-            word-wrap: break-word;
-            overflow: hidden;
-            position: relative;
-            min-height: 40px;
-            margin-bottom: 10px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .entry:hover {
-            transform: scale(1.15);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
+
         .entry-time {
             position: absolute;
             top: 5px;
@@ -215,7 +197,7 @@
                     pagination.appendChild(pageLink);
                 }
             } else {
-                let lef = 0, rig = 0;
+                let lef, rig;
                 if(currentPage <= 5) {
                     lef = currentPage - 1;
                     rig = 10 - lef;

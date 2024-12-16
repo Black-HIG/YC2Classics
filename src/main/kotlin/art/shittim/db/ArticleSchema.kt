@@ -1,28 +1,32 @@
 package art.shittim.db
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.dao.id.UUIDTable
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-
-@Serializable
-data class ArticleLine(
-    val time: String,
-    val contrib: String,
-    val line: String
-)
+import java.util.*
 
 class ArticleService(db: Database) {
     @Suppress("ExposedReference")
-    object ArticleTable : Table("articles") {
-        val id = integer("id").autoIncrement()
+    object ArticleTable : UUIDTable("articles") {
         val time = text("time")
         val contrib = text("contributor")
         val line = text("line")
+        val unsure = bool("unsure")
+        val sensitive = bool("sensitive")
+    }
 
-        override val primaryKey = PrimaryKey(id)
+    class ArticleEntity(id: EntityID<UUID>) : UUIDEntity(id) {
+        companion object : UUIDEntityClass<ArticleEntity>(ArticleTable)
+
+        var time by ArticleTable.time
+        var contrib by ArticleTable.contrib
+        var line by ArticleTable.line
+        var unsure by ArticleTable.unsure
+        var sensitive by ArticleTable.sensitive
     }
 
     init {
@@ -30,44 +34,4 @@ class ArticleService(db: Database) {
             SchemaUtils.create(ArticleTable)
         }
     }
-
-    suspend fun create(data: ArticleLine): Int = dbQuery {
-        ArticleTable.insert {
-            it[line] = data.line
-            it[time] = data.time
-            it[contrib] = data.contrib
-        }[ArticleTable.id]
-    }
-
-    suspend fun read(id: Int): ArticleLine? {
-        return dbQuery {
-            ArticleTable.selectAll()
-                .where { ArticleTable.id eq id }
-                .map { ArticleLine(
-                    it[ArticleTable.time],
-                    it[ArticleTable.contrib],
-                    it[ArticleTable.line]
-                ) }
-                .singleOrNull()
-        }
-    }
-
-    suspend fun update(id: Int, data: ArticleLine) {
-        dbQuery {
-            ArticleTable.update({ ArticleTable.id eq id }) {
-                it[line] = data.line
-                it[time] = data.time
-                it[contrib] = data.contrib
-            }
-        }
-    }
-
-    suspend fun delete(id: Int) {
-        dbQuery {
-            ArticleTable.deleteWhere { ArticleTable.id.eq(id) }
-        }
-    }
-
-    suspend fun <T> dbQuery(block: suspend () -> T): T =
-        newSuspendedTransaction(Dispatchers.IO) { block() }
 }

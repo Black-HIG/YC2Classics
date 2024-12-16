@@ -1,7 +1,7 @@
 package art.shittim.routing
 
 import art.shittim.db.ArticleService
-import art.shittim.db.articleService
+import art.shittim.utils.UUID
 import io.ktor.http.*
 import io.ktor.resources.*
 import io.ktor.server.pebble.*
@@ -9,7 +9,7 @@ import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 @Suppress("unused")
 @Resource("/read")
@@ -29,44 +29,46 @@ class Read {
 
 @Serializable
 data class IdArticleLine(
-    val id: Int,
+    val id: UUID,
     val line: String,
     val time: String,
-    val contrib: String
+    val contrib: String,
+    val unsure: Boolean,
+    val sensitive: Boolean,
 )
 
 @Serializable
 data class PebArticleLine(
     val line: String,
     val time: String,
-    val contrib: String
+    val contrib: String,
+    val unsure: Boolean,
+    val sensitive: Boolean,
 )
 
 fun Route.readRoutes() {
     get<Read.Json> {
-        val lines = articleService.dbQuery {
-            ArticleService.ArticleTable.selectAll()
-                .map {
-                    IdArticleLine(
-                        it[ArticleService.ArticleTable.id],
-                        it[ArticleService.ArticleTable.line],
-                        it[ArticleService.ArticleTable.time],
-                        it[ArticleService.ArticleTable.contrib]
-                    )
-                }
-                .toList()
+        val lines = newSuspendedTransaction {
+            ArticleService.ArticleEntity.all().map {
+                IdArticleLine(
+                    it.id.value,
+                    it.line,
+                    it.time,
+                    it.contrib,
+                    it.unsure,
+                    it.sensitive
+                )
+            }
         }
 
         call.respond(lines)
     }
 
     get<Read.Plain> {
-        val lines = articleService.dbQuery {
-            ArticleService.ArticleTable.selectAll()
-                .map {
-                    it[ArticleService.ArticleTable.line]
-                }
-                .toList()
+        val lines = newSuspendedTransaction {
+            ArticleService.ArticleEntity.all().map {
+                "${it.line} ${if (it.unsure) "\nWarning: The content above is a unsure content, we can't judge its realness" else ""}"
+            }
         }
 
         call.respond(lines.joinToString(separator = "\n\n"))
@@ -78,11 +80,10 @@ fun Route.readRoutes() {
 
         sb.appendLine("# 英才二班典籍\n")
 
-        articleService.dbQuery {
-            ArticleService.ArticleTable.selectAll()
-                .map {
-                    it[ArticleService.ArticleTable.line]
-                }
+        newSuspendedTransaction {
+            ArticleService.ArticleEntity.all().map {
+                it.line
+            }
                 .forEach {
                     sb.appendLine("${++i}.  $it")
                 }
@@ -92,33 +93,28 @@ fun Route.readRoutes() {
     }
 
     get<Read.Html> {
-        val lines = articleService.dbQuery {
-            ArticleService.ArticleTable.selectAll()
-                .map {
-                    IdArticleLine(
-                        it[ArticleService.ArticleTable.id],
-                        it[ArticleService.ArticleTable.line],
-                        it[ArticleService.ArticleTable.time],
-                        it[ArticleService.ArticleTable.contrib]
-                    )
-                }
-                .toList()
-        }.map {
-            PebArticleLine(
-                it.line,
-                it.time,
-                it.contrib
-            )
+        val lines = newSuspendedTransaction {
+            ArticleService.ArticleEntity.all().map {
+                PebArticleLine(
+                    it.line,
+                    it.time,
+                    it.contrib,
+                    it.unsure,
+                    it.sensitive
+                )
+            }
         }
-        
-        call.respond(PebbleContent(
-            "article.peb",
-            mapOf(
-                "lines" to lines,
-                "header" to System.getenv("WEB_HEADER"),
-                "footer" to System.getenv("WEB_FOOTER")
+
+        call.respond(
+            PebbleContent(
+                "article.peb",
+                mapOf(
+                    "lines" to lines,
+                    "header" to System.getenv("WEB_HEADER"),
+                    "footer" to System.getenv("WEB_FOOTER")
+                )
             )
-        ))
+        )
     }
 
     get("/") {
@@ -128,8 +124,11 @@ fun Route.readRoutes() {
     get("/line/{id}") {
         val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
         val line = try {
-            articleService.read(id.toInt()) ?: return@get call.respond(HttpStatusCode.NotFound)
-        } catch (e: Exception) {
+            newSuspendedTransaction {
+                ArticleService.ArticleEntity.findById(UUID.fromString(id))
+            } ?: return@get call.respond(HttpStatusCode.NotFound)
+            //articleService.read(id.toInt()) ?: return@get call.respond(HttpStatusCode.NotFound)
+        } catch (_: Exception) {
             return@get call.respond(HttpStatusCode.NotFound)
         }
         call.respond(line)

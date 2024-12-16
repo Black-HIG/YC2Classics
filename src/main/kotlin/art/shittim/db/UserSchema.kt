@@ -1,14 +1,22 @@
 package art.shittim.db
 
 import art.shittim.logger
-import art.shittim.secure.*
-import kotlinx.coroutines.Dispatchers
+import art.shittim.secure.allPerm
+import art.shittim.secure.argon2verify
+import art.shittim.secure.generateRandomString
+import art.shittim.secure.hashed
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.dao.id.UUIDTable
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.*
 
 @Serializable
 data class BeanUser(
@@ -31,13 +39,24 @@ data class UserData(
 
 class UserService(db: Database) {
     @Suppress("ExposedReference")
-    object UserTable : Table("users") {
-        val id = integer("id").autoIncrement()
+    object UserTable : UUIDTable("users") {
         val username = varchar("username", 50).uniqueIndex()
         val password = varchar("password", 300)
         val perm = long("perm")
+    }
 
-        override val primaryKey = PrimaryKey(id)
+    class UserEntity(id: EntityID<UUID>) : UUIDEntity(id) {
+        companion object : UUIDEntityClass<UserEntity>(UserTable) {
+            fun findByName(username: String) =
+                find { UserTable.username eq username }
+
+            fun findByNameAndUpdate(username: String, block: (it: UserEntity) -> Unit) =
+                findSingleByAndUpdate(UserTable.username eq username, block)
+        }
+
+        var username by UserTable.username
+        var password by UserTable.password
+        var perm by UserTable.perm
     }
 
     init {
@@ -46,9 +65,20 @@ class UserService(db: Database) {
         }
 
         runBlocking {
-            val password = generateRandomString(16)
+            val generatedPassword = generateRandomString(16)
 
-            if (readIdByName("admin") == null) {
+            newSuspendedTransaction {
+                UserEntity.find { UserTable.username eq "admin" }.singleOrNull() ?: run {
+                    UserEntity.new {
+                        username = "admin"
+                        password = generatedPassword.hashed()
+                        perm = allPerm
+                    }
+
+                    logger.info("Auto-created admin account, password: $generatedPassword")
+                }
+            }
+            /*if (readIdByName("admin") == null) {
                 create(
                     PasswordUser(
                         username = "admin",
@@ -58,86 +88,19 @@ class UserService(db: Database) {
                 )
 
                 logger.info("Auto-created admin account, password: $password")
-            }
-        }
-    }
-
-    suspend fun create(data: PasswordUser): Int = dbQuery {
-        UserTable.insert {
-            it[username] = data.username
-            it[password] = data.password.hashed()
-            it[perm] = data.perm
-        }[UserTable.id]
-    }
-
-    @Suppress("unused")
-    suspend fun read(id: Int): BeanUser? {
-        return dbQuery {
-            UserTable.selectAll()
-                .where { UserTable.id eq id }
-                .map {
-                    BeanUser(
-                        it[UserTable.username],
-                        it[UserTable.perm]
-                    )
-                }
-                .singleOrNull()
+            }*/
         }
     }
 
     suspend fun auth(name: String, password: String): Long {
-        val row = dbQuery {
-            UserTable.selectAll()
-                .where { UserTable.username eq name }
-                .singleOrNull()
-        } ?: return -1
+        return newSuspendedTransaction {
+            val user = UserEntity.find {UserTable.username eq name }.singleOrNull() ?: return@newSuspendedTransaction -1
 
-        return if (argon2verify(row[UserTable.password], password)) {
-            row[UserTable.perm]
-        } else {
-            -1
-        }
-    }
-
-    suspend fun readByName(name: String): BeanUser? {
-        return dbQuery {
-            UserTable.selectAll()
-                .where { UserTable.username eq name }
-                .map {
-                    BeanUser(
-                        it[UserTable.username],
-                        it[UserTable.perm]
-                    )
-                }
-                .singleOrNull()
-        }
-    }
-
-    suspend fun readIdByName(name: String): Int? {
-        return dbQuery {
-            UserTable.selectAll()
-                .where { UserTable.username eq name }
-                .map { it[UserTable.id] }
-                .singleOrNull()
-        }
-    }
-
-    suspend fun update(id: Int, data: PasswordUser) {
-        dbQuery {
-            UserTable.update({ UserTable.id eq id }) {
-                it[username] = data.username
-                it[perm] = data.perm
-                it[password] = data.password.hashed()
+            if (argon2verify(user.password, password)) {
+                user.perm
+            } else {
+                -1
             }
         }
     }
-
-    suspend fun delete(id: Int) {
-        dbQuery {
-            UserTable.deleteWhere { UserTable.id.eq(id) }
-        }
-    }
-
-    suspend fun <T> dbQuery(block: suspend () -> T): T =
-        newSuspendedTransaction(Dispatchers.IO) { block() }
 }

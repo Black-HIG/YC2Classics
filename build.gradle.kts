@@ -1,10 +1,11 @@
+@file:Suppress("PropertyName", "VulnerableLibrariesLocal")
+
 import io.ktor.plugin.features.*
 
 val exposed_version: String by project
 val h2_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
-val jte_version: String by project
 val hoplite_version: String by project
 val clikt_version: String by project
 val postgre_version: String by project
@@ -51,12 +52,14 @@ dependencies {
     implementation("io.ktor:ktor-server-pebble")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-cio")
+    implementation("io.ktor:ktor-server-openapi")
     implementation("io.ktor:ktor-server-sessions")
     implementation("io.ktor:ktor-server-auth-jwt")
     implementation("io.ktor:ktor-client-content-negotiation")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposed_version")
     implementation("com.sksamuel.hoplite:hoplite-core:$hoplite_version")
