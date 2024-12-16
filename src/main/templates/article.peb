@@ -330,15 +330,6 @@
                 if (entry.unsure) {
                     entryContent += `<div class="unsure-warning">本条目真实性有待考究</div>`;
                 }
-                if (entry.sensitive) {
-                    entryContent += `
-                        <div class="sensitive-warning">
-                            Content warning: Sensitive Content<br>
-                            web admin labeled this post as containing Sensitive Content.<br>
-                            Please click to view
-                        </div>
-                    `;
-                }
                 div.innerHTML = entryContent;
 
                 if (entry.sensitive) {
