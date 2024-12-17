@@ -2,7 +2,7 @@ services:
   web:
     env_file:
       - .env
-    build: .
+    image: blackhig/yc2-classics
     ports:
       - "25611:31234"
     depends_on:
