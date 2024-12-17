@@ -5,9 +5,6 @@ services:
     image: blackhig/yc2-classics
     ports:
       - "25611:31234"
-    depends_on:
-      db:
-        condition: service_healthy
     restart: always
     volumes:
       - ./classics/db:/var/lib/classics/db
