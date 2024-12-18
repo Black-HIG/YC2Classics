@@ -3,7 +3,7 @@
     title: YC-2 Classics API Documentation
     description: |-
       This is a http api documentation for classics storage server.
-    version: 0.1.2
+    version: 0.1.3
   servers:
     - url: classics.shittim.art
   tags:
