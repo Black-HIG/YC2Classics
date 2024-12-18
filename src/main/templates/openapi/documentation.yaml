@@ -1,0 +1,78 @@
+  openapi: 3.0.3
+  info:
+    title: YC-2 Classics API Documentation
+    description: |-
+      This is a http api documentation for classics storage server.
+    version: 0.1.2
+  servers:
+    - url: classics.shittim.art
+  tags:
+    - name: user
+      description: Operations about user
+    - name: line
+      description: Everything about classics content
+    - name: read
+      description: Reading classics article
+  paths:
+    /read/json:
+      get:
+        tags:
+          - read
+        summary: Reading article as json output
+        description: Reading article as json format
+        responses:
+          200:
+            description: Json format article
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ArticleLine'
+    /read/html:
+      get:
+        tags:
+          - read
+        summary: HTML Article Page
+        description: Get a HTML Res
+        responses:
+          200:
+            description: HTML Article Page
+    /user/list:
+      get:
+        tags:
+          - user
+        security:
+          - classics_auth: []
+        responses:
+          200:
+            description: OK
+  components:
+    schemas:
+      ArticleLine:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+            example: a666faf1-f030-4227-941a-0fae92fedf87
+          line:
+            type: string
+            example: Eating in classroom
+          time:
+            type: string
+            example: 2024.12.18 20:12
+          contrib:
+            type: string
+            example: admin
+          unsure:
+            type: boolean
+            example: true
+          sensitive:
+            type: boolean
+            example: false
+    securitySchemes:
+      classics_auth:
+        name: "Classics Authentication"
+        type: http
+        bearerFormat: JWT
+        scheme: bearer
+

@@ -119,7 +119,7 @@ fun Application.configureSecurity() {
     }
 
     routing {
-        post("/login") {
+        post("/user/login") {
             val user = call.receive<UserPassword>()
 
             val perm = userService.auth(user.username, user.password)

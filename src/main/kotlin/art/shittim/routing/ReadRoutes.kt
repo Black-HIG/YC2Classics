@@ -1,6 +1,7 @@
 package art.shittim.routing
 
 import art.shittim.db.ArticleService
+import art.shittim.routing.Read.JsonWithTally
 import art.shittim.utils.UUID
 import io.ktor.http.*
 import io.ktor.resources.*
@@ -14,6 +15,9 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 @Suppress("unused")
 @Resource("/read")
 class Read {
+    @Resource("/json_with_tally") // J W T
+    class JsonWithTally(val parent: Read = Read())
+
     @Resource("json")
     class Json(val parent: Read = Read())
 
@@ -46,6 +50,12 @@ data class PebArticleLine(
     val sensitive: Boolean,
 )
 
+@Serializable
+data class JsonWithTallyResponse(
+    val lines: List<IdArticleLine>,
+    val tally: Int
+)
+
 const val kivo = "https://static.kivo.wiki/images"
 
 @Suppress("NonAsciiCharacters", "ObjectPropertyName")
@@ -75,8 +85,26 @@ fun Route.readRoutes() {
             }
         }
 
-        call.respond(lines)
+        call.respond(HttpStatusCode.OK, lines)
     }
+
+    get<JsonWithTally> {
+        val lines = newSuspendedTransaction {
+            ArticleService.ArticleEntity.all().map {
+                IdArticleLine(
+                    it.id.value,
+                    it.line,
+                    it.time,
+                    it.contrib,
+                    it.unsure,
+                    it.sensitive
+                )
+            }
+        }
+
+        call.respond(HttpStatusCode.OK, JsonWithTallyResponse(lines, lines.size))
+    }
+
 
     get<Read.Plain> {
         val lines = newSuspendedTransaction {
@@ -85,7 +113,7 @@ fun Route.readRoutes() {
             }
         }
 
-        call.respond(lines.joinToString(separator = "\n\n"))
+        call.respond(HttpStatusCode.OK, lines.joinToString(separator = "\n\n"))
     }
 
     get<Read.Markdown> {
@@ -103,7 +131,7 @@ fun Route.readRoutes() {
                 }
         }
 
-        call.respond(sb.toString())
+        call.respond(HttpStatusCode.OK, sb.toString())
     }
 
     get<Read.Html> {
@@ -122,6 +150,7 @@ fun Route.readRoutes() {
         val iconUrl = `ウシオ-ノアs`.random().replace("/kivo", kivo)
 
         call.respond(
+            HttpStatusCode.OK,
             PebbleContent(
                 "article.peb",
                 mapOf(
@@ -148,6 +177,6 @@ fun Route.readRoutes() {
         } catch (_: Exception) {
             return@get call.respond(HttpStatusCode.NotFound)
         }
-        call.respond(line)
+        call.respond(HttpStatusCode.OK, line)
     }
 }
