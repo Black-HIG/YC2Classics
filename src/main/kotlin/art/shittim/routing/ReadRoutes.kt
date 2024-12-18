@@ -46,6 +46,20 @@ data class PebArticleLine(
     val sensitive: Boolean,
 )
 
+const val kivo = "https://static.kivo.wiki/images"
+
+@Suppress("NonAsciiCharacters", "ObjectPropertyName")
+val `ウシオ-ノアs` = listOf(
+    "/kivo/students/生盐 诺亚/gallery/初始立绘差分/J_8_waifu2x_2x_1n_png.jpg",
+    "/kivo/students/生盐 诺亚/gallery/初始立绘差分/J_4_waifu2x_2x_1n_png.jpg",
+    "/kivo/students/生盐 诺亚/gallery/初始立绘差分/J_5_waifu2x_2x_1n_png.jpg",
+    "/kivo/students/生盐 诺亚/gallery/初始立绘差分/J_6_waifu2x_2x_1n_png.jpg",
+    "/kivo/students/生盐 诺亚/gallery/初始立绘差分/J_1_waifu2x_2x_1n_png.jpg",
+    "/kivo/students/生盐 诺亚/gallery/初始立绘差分/J_7_waifu2x_2x_1n_png.jpg",
+    "/kivo/students/生盐 诺亚/gallery/初始立绘差分/J_3_waifu2x_2x_1n_png.jpg",
+    "/kivo/students/生盐 诺亚/gallery/初始立绘差分/J_2_waifu2x_2x_1n_png.jpg"
+)
+
 fun Route.readRoutes() {
     get<Read.Json> {
         val lines = newSuspendedTransaction {
@@ -105,13 +119,16 @@ fun Route.readRoutes() {
             }
         }
 
+        val iconUrl = `ウシオ-ノアs`.random().replace("/kivo", kivo)
+
         call.respond(
             PebbleContent(
                 "article.peb",
                 mapOf(
                     "lines" to lines,
                     "header" to System.getenv("WEB_HEADER"),
-                    "footer" to System.getenv("WEB_FOOTER")
+                    "footer" to System.getenv("WEB_FOOTER"),
+                    "icon_url" to iconUrl
                 )
             )
         )

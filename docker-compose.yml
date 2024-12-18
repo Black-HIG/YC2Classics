@@ -7,4 +7,4 @@ services:
       - "25611:31234"
     restart: always
     volumes:
-      - ./classics/db:/var/lib/classics/db
+      - ./classics:/var/lib/classics/
