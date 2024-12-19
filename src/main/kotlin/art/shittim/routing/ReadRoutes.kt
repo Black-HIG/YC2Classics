@@ -1,6 +1,7 @@
 package art.shittim.routing
 
 import art.shittim.db.ArticleService
+import art.shittim.routing.IdArticleLine
 import art.shittim.routing.Read.JsonWithTally
 import art.shittim.utils.UUID
 import io.ktor.http.*
@@ -177,6 +178,16 @@ fun Route.readRoutes() {
         } catch (_: Exception) {
             return@get call.respond(HttpStatusCode.NotFound)
         }
-        call.respond(HttpStatusCode.OK, line)
+        call.respond(
+            HttpStatusCode.OK,
+            IdArticleLine(
+                line.id.value,
+                line.line,
+                line.time,
+                line.contrib,
+                line.unsure,
+                line.sensitive
+            )
+        )
     }
 }

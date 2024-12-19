@@ -230,9 +230,13 @@
         <br>
         如果你认为本网站某些内容侵犯了您的合法权益，网站所有者乐意为您删除你认为不合理的内容
     </footer>
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script nomodule defer src="https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.js" integrity="sha384-zuSLTEzan5q8B3VF09V3GHDwr7/cqxebTOtipDSItrKsHX2qgt+5GB1sti60+AHt" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.css" integrity="sha384-9PvLvaiSKCPkFKB1ZsEoTjgnJn+O3KvEwtsz37/XrkYft3DTk2gHdYvd9oWgW3tV" crossorigin="anonymous">
+    <script type="module">
+        import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.mjs';
         const data = {"data":[
-            {"time":"2024-01-17 09:30:55","content":"参加了学校组织的义务劳动。","contrib":null,"unsure":false,"sensitive":false},
+            {"time":"2024-01-17 09:30:55","content":"1 $\\frac{1}{2} + \\sum_{i=1}^{n}f(i)$","contrib":null,"unsure":false,"sensitive":false},
             {"time":"不详","content":"分享了一本好书。","contrib":"学生A","unsure":true,"sensitive":false},
             {"time":"2024-11-14 09:30:55","content":"完成了一幅精美的手工作品。","contrib":"学生D","unsure":false,"sensitive":true},
             {"time":"2024-02-12 09:30:55","content":"参加了学校组织的义务劳动。","contrib":"学生D","unsure":false,"sensitive":false},
@@ -408,7 +412,16 @@
                 }
                 
                 const contentDiv = document.createElement('div');
-                contentDiv.textContent = entry.content;
+                const pattern = /\$(.*?)\$/g;
+                function render_(p1) {
+                    return katex.renderToString(p1)
+                }
+                const next_content = entry.content.replace(
+                    pattern,
+                    (match, p1) => render_(p1)
+                )
+                contentDiv.innerHTML = marked.parse(next_content)
+                //contentDiv.textContent = entry.content;
 
                 const box = document.createElement('div');
                 box.appendChild(headerDiv);
