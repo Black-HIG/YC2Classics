@@ -15,7 +15,7 @@ fun Application.configureDatabases() {
     }
     val database = Database.connect(
         url = jdbcUrl,
-        user = "postgres",
+        user = "postgres", // NTR
         password = "password",
     )
     //val database = config.database.database

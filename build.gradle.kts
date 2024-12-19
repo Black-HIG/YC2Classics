@@ -20,7 +20,7 @@ plugins {
 }
 
 group = "art.shittim"
-version = "0.1.3"
+version = "0.1.4"
 
 application {
     mainClass.set("art.shittim.ApplicationKt")
