@@ -231,7 +231,7 @@
         <br>
         如果你认为本网站某些内容侵犯了您的合法权益，网站所有者乐意为您删除你认为不合理的内容
     </footer>
-    script src="https://s4.zstatic.net/npm/marked/marked.min.js"></script>
+    <script src="https://s4.zstatic.net/npm/marked/marked.min.js"></script>
     <script nomodule defer src="https://s4.zstatic.net/npm/katex@0.16.18/dist/katex.js" integrity="sha384-zuSLTEzan5q8B3VF09V3GHDwr7/cqxebTOtipDSItrKsHX2qgt+5GB1sti60+AHt" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://s4.zstatic.net/npm/katex@0.16.18/dist/katex.css" integrity="sha384-9PvLvaiSKCPkFKB1ZsEoTjgnJn+O3KvEwtsz37/XrkYft3DTk2gHdYvd9oWgW3tV" crossorigin="anonymous">
     <script type="module">
