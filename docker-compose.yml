@@ -8,3 +8,4 @@ services:
     restart: always
     volumes:
       - ./classics:/var/lib/classics/
+      - ./logs:/app/logs
