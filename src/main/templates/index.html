@@ -237,7 +237,10 @@
         import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.mjs';
         import markdownIt from 'https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm';
 
-        const md = markdownIt()
+        const md = markdownIt({
+            html: true,
+            typographer: true
+        })
 
         md.renderer.rules.image = function (tokens, idx) {
             const token = tokens[idx];
@@ -265,7 +268,7 @@
         const data = {"data":[
             {"time":"2024-01-17 09:30:55","content":"city指着后面黑板上一行字$^{\\textcircled{1}}$：我勒个繁体字啊，哪有繁体字这么写的\n\n$\\textcircled{1}$ 原文为 \"計算通り，完璧きー\"","contributor":null,"unsure":false,"sensitive":false},
             {"time":"不详","content":"![迟到人员名单](https://static.shittim.art/images/20241220151151%20%E7%AC%AC1%E9%A1%B5.png) ![xswl](https://static.shittim.art/images/a35fb8cbe853ecaaf3fa79487fe5513e.jpg)","contributor":"学生A","unsure":true,"sensitive":false},
-            {"time":"2024-11-14 09:30:55","content":"完成了一幅精美的手工作品。","contributor":"学生D","unsure":false,"sensitive":true},
+            {"time":"2024-11-14 09:30:55","content":"<img src=https://static.shittim.art/images/20241220151151%20%E7%AC%AC1%E9%A1%B5.png style='width:300px;'>","contributor":"学生D","unsure":false,"sensitive":false},
             {"time":"2024-02-12 09:30:55","content":"参加了学校组织的义务劳动。","contributor":"学生D","unsure":false,"sensitive":false},
             {"time":"待定","content":"提出了一个非常有趣的问题。","contributor":"学生B","unsure":true,"sensitive":true}
         ]};

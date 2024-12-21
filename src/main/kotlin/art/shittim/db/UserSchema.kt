@@ -68,7 +68,7 @@ class UserService(db: Database) {
             val generatedPassword = generateRandomString(16)
 
             newSuspendedTransaction {
-                UserEntity.find { UserTable.username eq "admin" }.singleOrNull() ?: run {
+                val admin = UserEntity.find { UserTable.username eq "admin" }.singleOrNull()?: run {
                     UserEntity.new {
                         username = "admin"
                         password = generatedPassword.hashed()
@@ -76,6 +76,13 @@ class UserService(db: Database) {
                     }
 
                     logger.info("Auto-created admin account, password: $generatedPassword")
+
+                    return@newSuspendedTransaction
+                }
+
+                if(admin.perm != allPerm) {
+                    admin.perm = allPerm
+                    logger.info("Privileged admin account")
                 }
             }
             /*if (readIdByName("admin") == null) {
