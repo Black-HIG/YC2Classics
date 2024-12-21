@@ -2,7 +2,8 @@ package art.shittim.routing
 
 import art.shittim.db.ArticleService
 import art.shittim.logger
-import art.shittim.secure.PArticleModify
+import art.shittim.secure.PArticleDelete
+import art.shittim.secure.PArticleWrite
 import art.shittim.secure.authenticatePerm
 import art.shittim.utils.UUID
 import io.ktor.http.*
@@ -24,7 +25,7 @@ data class RequestArticleLine(
 
 fun Route.writeRoutes() {
     authenticate("auth-jwt") {
-        authenticatePerm(PArticleModify) {
+        authenticatePerm(PArticleWrite) {
             post("/line/append") {
                 val request = call.receive<RequestArticleLine>()
 
@@ -47,7 +48,11 @@ fun Route.writeRoutes() {
                 }
 
                 call.respond(HttpStatusCode.Created)
-                logger.info("Created ${if(request.unsure) "unsure" else ""} ${if(request.sensitive) "sensitive" else ""} line {}:{}", request.contrib, request.line)
+                logger.info(
+                    "Created ${if (request.unsure) "unsure" else ""} ${if (request.sensitive) "sensitive" else ""} line {}:{}",
+                    request.contrib,
+                    request.line
+                )
             }
 
             put("/line/{id}") {
@@ -65,9 +70,15 @@ fun Route.writeRoutes() {
                 }
 
                 call.respond(HttpStatusCode.OK)
-                logger.info("Updated ${if(request.unsure) "unsure" else ""} ${if(request.sensitive) "sensitive" else ""} line {}:{}", request.contrib, request.line)
+                logger.info(
+                    "Updated ${if (request.unsure) "unsure" else ""} ${if (request.sensitive) "sensitive" else ""} line {}:{}",
+                    request.contrib,
+                    request.line
+                )
             }
+        }
 
+        authenticatePerm(PArticleDelete) {
             delete("/line/{id}") {
                 val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
 
@@ -76,7 +87,11 @@ fun Route.writeRoutes() {
                 newSuspendedTransaction { line.delete() }
 
                 call.respond(HttpStatusCode.OK)
-                logger.info("Deleted ${if(line.unsure) "unsure" else ""} ${if(line.sensitive) "sensitive" else ""} line {}:{}", line.contrib, line.line)
+                logger.info(
+                    "Deleted ${if (line.unsure) "unsure" else ""} ${if (line.sensitive) "sensitive" else ""} line {}:{}",
+                    line.contrib,
+                    line.line
+                )
             }
         }
     }

@@ -1,6 +1,8 @@
 package art.shittim.routing
 
 import io.ktor.server.application.*
+import io.ktor.server.http.content.static
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.openapi.openAPI
 import io.ktor.server.resources.Resources
 import io.ktor.server.routing.*

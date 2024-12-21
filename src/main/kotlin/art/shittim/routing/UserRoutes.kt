@@ -6,6 +6,8 @@ import art.shittim.db.UserData
 import art.shittim.db.UserService
 import art.shittim.db.UserService.UserTable
 import art.shittim.logger
+import art.shittim.secure.PAccountDelete
+import art.shittim.secure.PAccountList
 import art.shittim.secure.PAccountModify
 import art.shittim.secure.authenticatePerm
 import art.shittim.secure.hashed
@@ -33,7 +35,7 @@ fun Route.userRoutes() {
     }
 
     authenticate("auth-jwt") {
-        authenticatePerm(PAccountModify) {
+        authenticatePerm(PAccountList) {
             get("/user/list") {
                 val users = newSuspendedTransaction {
                     UserService.UserEntity.all()
@@ -47,7 +49,9 @@ fun Route.userRoutes() {
 
                 call.respond(users)
             }
+        }
 
+        authenticatePerm(PAccountModify) {
             put("/user/{name}") {
                 val name = call.parameters["name"] ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val id = newSuspendedTransaction {
@@ -61,7 +65,7 @@ fun Route.userRoutes() {
                     )
                 }
 
-                if(id == null) {
+                if (id == null) {
                     newSuspendedTransaction {
                         UserService.UserEntity.new {
                             username = user.username
@@ -71,19 +75,21 @@ fun Route.userRoutes() {
                     }
                     logger.info("Created new user named {} with perm {}", name, user.perm)
                 } else {
-                   newSuspendedTransaction {
-                       UserService.UserEntity.findByNameAndUpdate(name) {
-                           it.username = user.username
-                           it.password = user.password.hashed()
-                           it.perm = user.perm
-                       }
-                   }
+                    newSuspendedTransaction {
+                        UserService.UserEntity.findByNameAndUpdate(name) {
+                            it.username = user.username
+                            it.password = user.password.hashed()
+                            it.perm = user.perm
+                        }
+                    }
                     logger.info("Updated user named {} with perm {}", name, user.perm)
                 }
 
                 call.respond(HttpStatusCode.Created)
             }
+        }
 
+        authenticatePerm(PAccountDelete) {
             delete("/user/{name}") {
                 val name = call.parameters["name"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 val id = newSuspendedTransaction {

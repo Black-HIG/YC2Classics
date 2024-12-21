@@ -230,14 +230,41 @@
         <br>
         如果你认为本网站某些内容侵犯了您的合法权益，网站所有者乐意为您删除你认为不合理的内容
     </footer>
-    <script src="https://s4.zstatic.net/npm/marked/marked.min.js"></script>
-    <script nomodule defer src="https://s4.zstatic.net/npm/katex@0.16.18/dist/katex.js" integrity="sha384-zuSLTEzan5q8B3VF09V3GHDwr7/cqxebTOtipDSItrKsHX2qgt+5GB1sti60+AHt" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://s4.zstatic.net/npm/katex@0.16.18/dist/katex.css" integrity="sha384-9PvLvaiSKCPkFKB1ZsEoTjgnJn+O3KvEwtsz37/XrkYft3DTk2gHdYvd9oWgW3tV" crossorigin="anonymous">
+    <script nomodule defer src="https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.js" integrity="sha384-zuSLTEzan5q8B3VF09V3GHDwr7/cqxebTOtipDSItrKsHX2qgt+5GB1sti60+AHt" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.css" integrity="sha384-9PvLvaiSKCPkFKB1ZsEoTjgnJn+O3KvEwtsz37/XrkYft3DTk2gHdYvd9oWgW3tV" crossorigin="anonymous">
     <script type="module">
-        import katex from 'https://s4.zstatic.net/npm/katex@0.16.18/dist/katex.mjs';
+        import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.mjs';
+        import markdownIt from 'https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm';
+
+        const md = markdownIt()
+
+        md.renderer.rules.image = function (tokens, idx) {
+            const token = tokens[idx];
+            const src = token.attrGet('src')
+            const alt = token.content
+            let width = token.attrGet('width') || '100%'
+            let height = token.attrGet('height') || '100%'
+
+            if (!width.endsWith('%')) {
+                if(!width.endsWith('px')) {
+                    width = width + 'px'
+                }
+            }
+            if(!height.endsWith('%')) {
+                if(!height.endsWith('px')) {
+                    height = height + 'px'
+                }
+            }
+
+            return `<img src="${src}" alt="${alt}" style="width: ${width}; height: ${height}">`
+        }
+
+        //md.use(katex)
+
         const data = {"data":[
-            {"time":"2024-01-17 09:30:55","content":"city指着后面黑板上一行字$^{\\textcircled{1}}$：我勒个繁体字啊，哪有繁体字这么写的<br><br>$\\textcircled{1}$ 原文为 \"計算通り，完璧きー\"","contributor":null,"unsure":false,"sensitive":false},
-            {"time":"不详","content":"![迟到人员名单](https://wsrv.nl/?url=https://static.shittim.art/20241220151151%20%E7%AC%AC1%E9%A1%B5.png&w=300)","contributor":"学生A","unsure":true,"sensitive":false},
+            {"time":"2024-01-17 09:30:55","content":"city指着后面黑板上一行字$^{\\textcircled{1}}$：我勒个繁体字啊，哪有繁体字这么写的\n\n$\\textcircled{1}$ 原文为 \"計算通り，完璧きー\"","contributor":null,"unsure":false,"sensitive":false},
+            {"time":"不详","content":"![迟到人员名单](https://static.shittim.art/images/20241220151151%20%E7%AC%AC1%E9%A1%B5.png) ![xswl](https://static.shittim.art/images/a35fb8cbe853ecaaf3fa79487fe5513e.jpg)","contributor":"学生A","unsure":true,"sensitive":false},
             {"time":"2024-11-14 09:30:55","content":"完成了一幅精美的手工作品。","contributor":"学生D","unsure":false,"sensitive":true},
             {"time":"2024-02-12 09:30:55","content":"参加了学校组织的义务劳动。","contributor":"学生D","unsure":false,"sensitive":false},
             {"time":"待定","content":"提出了一个非常有趣的问题。","contributor":"学生B","unsure":true,"sensitive":true}
@@ -416,11 +443,11 @@
                 function render_(p1) {
                     return katex.renderToString(p1)
                 }
-                const next_content = entry.content.replace(
+                contentDiv.innerHTML = md.render(entry.content).replace(
                     pattern,
                     (match, p1) => render_(p1)
                 )
-                contentDiv.innerHTML = marked.parse(next_content)
+                //contentDiv.innerHTML = md.render(entry.content)
                 //contentDiv.textContent = entry.content;
 
                 const box = document.createElement('div');
