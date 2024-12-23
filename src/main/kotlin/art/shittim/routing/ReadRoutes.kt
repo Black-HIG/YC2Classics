@@ -2,10 +2,8 @@ package art.shittim.routing
 
 import art.shittim.db.ArticleService
 import art.shittim.routing.Read.JsonWithTally
-import art.shittim.secure.PAccountList
 import art.shittim.secure.PArticleHidden
 import art.shittim.secure.authenticatePerm
-import art.shittim.secure.hasPerm
 import art.shittim.utils.UUID
 import io.ktor.http.*
 import io.ktor.resources.*
@@ -74,89 +72,81 @@ val `ウシオ-ノアs` = listOf(
 )
 
 fun Route.readRoutes() {
-    authenticate("auth-jwt", optional = true) {
-        get<Read.Json> {
-            hasPerm(
-                listOf(PAccountList),
-                {
-                    val lines = newSuspendedTransaction {
-                        ArticleService.ArticleEntity.all().map {
-                            IdArticleLine(
-                                it.id.value,
-                                it.line,
-                                it.time,
-                                it.contrib,
-                                it.unsure,
-                                it.sensitive,
-                                it.hidden
-                            )
-                        }
-                    }
-
-                    call.respond(HttpStatusCode.OK, lines)
-                },
-                {
-                    val lines = newSuspendedTransaction {
-                        ArticleService.ArticleEntity.all()
-                            .filter { it.hidden == false }
-                            .map {
-                            IdArticleLine(
-                                it.id.value,
-                                it.line,
-                                it.time,
-                                it.contrib,
-                                it.unsure,
-                                it.sensitive,
-                                it.hidden
-                            )
-                        }
-                    }
-
-                    call.respond(HttpStatusCode.OK, lines)
+    get<Read.Json> {
+        val lines = newSuspendedTransaction {
+            ArticleService.ArticleEntity.all()
+                .filter { it.hidden == false }
+                .map {
+                    IdArticleLine(
+                        it.id.value,
+                        it.line,
+                        it.time,
+                        it.contrib,
+                        it.unsure,
+                        it.sensitive,
+                        it.hidden
+                    )
                 }
-            )
         }
 
-        get<JsonWithTally> {
-            hasPerm(
-                listOf(PAccountList),
-                {
-                    val lines = newSuspendedTransaction {
-                        ArticleService.ArticleEntity.all().map {
-                            IdArticleLine(
-                                it.id.value,
-                                it.line,
-                                it.time,
-                                it.contrib,
-                                it.unsure,
-                                it.sensitive,
-                                it.hidden
-                            )
-                        }
-                    }
-
-                    call.respond(HttpStatusCode.OK, JsonWithTallyResponse(lines, lines.size))
-                },
-                {
-                    val lines = newSuspendedTransaction {
-                        ArticleService.ArticleEntity.all()
-                            .filter { it.hidden == false }
-                            .map {
-                                IdArticleLine(
-                                    it.id.value,
-                                    it.line,
-                                    it.time,
-                                    it.contrib,
-                                    it.unsure,
-                                    it.sensitive,
-                                    it.hidden
-                                )
-                            }
-                    }
-
-                    call.respond(HttpStatusCode.OK, JsonWithTallyResponse(lines, lines.size))
+        call.respond(HttpStatusCode.OK, lines)
+    }
+    get<JsonWithTally> {
+        val lines = newSuspendedTransaction {
+            ArticleService.ArticleEntity.all()
+                .filter { it.hidden == false }
+                .map {
+                    IdArticleLine(
+                        it.id.value,
+                        it.line,
+                        it.time,
+                        it.contrib,
+                        it.unsure,
+                        it.sensitive,
+                        it.hidden
+                    )
                 }
-            )
+        }
+
+        call.respond(HttpStatusCode.OK, JsonWithTallyResponse(lines, lines.size))
+    }
+
+    authenticate("auth-jwt", optional = true) {
+        authenticatePerm(PArticleHidden) {
+            get<Read.Json> {
+                val lines = newSuspendedTransaction {
+                    ArticleService.ArticleEntity.all().map {
+                        IdArticleLine(
+                            it.id.value,
+                            it.line,
+                            it.time,
+                            it.contrib,
+                            it.unsure,
+                            it.sensitive,
+                            it.hidden
+                        )
+                    }
+                }
+
+                call.respond(HttpStatusCode.OK, lines)
+            }
+            get<JsonWithTally> {
+                val lines = newSuspendedTransaction {
+                    ArticleService.ArticleEntity.all().map {
+                        IdArticleLine(
+                            it.id.value,
+                            it.line,
+                            it.time,
+                            it.contrib,
+                            it.unsure,
+                            it.sensitive,
+                            it.hidden
+                        )
+                    }
+                }
+
+                call.respond(HttpStatusCode.OK, JsonWithTallyResponse(lines, lines.size))
+            }
         }
     }
 
