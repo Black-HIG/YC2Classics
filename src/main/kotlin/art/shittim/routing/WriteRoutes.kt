@@ -21,6 +21,7 @@ data class RequestArticleLine(
     val line: String,
     val unsure: Boolean,
     val sensitive: Boolean,
+    val hidden: Boolean,
 )
 
 fun Route.writeRoutes() {
@@ -44,6 +45,7 @@ fun Route.writeRoutes() {
                         line = request.line
                         unsure = request.unsure
                         sensitive = request.sensitive
+                        hidden = request.hidden
                     }
                 }
 
@@ -66,6 +68,7 @@ fun Route.writeRoutes() {
                         it.line = request.line
                         it.unsure = request.unsure
                         it.sensitive = request.sensitive
+                        it.hidden = request.hidden
                     }
                 }
 

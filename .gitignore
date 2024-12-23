@@ -41,3 +41,4 @@ data.mv.db
 application-config.yml
 .env
 /classics/
+/logs/

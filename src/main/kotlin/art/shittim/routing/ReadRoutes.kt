@@ -1,11 +1,15 @@
 package art.shittim.routing
 
 import art.shittim.db.ArticleService
-import art.shittim.routing.IdArticleLine
 import art.shittim.routing.Read.JsonWithTally
+import art.shittim.secure.PArticleHidden
+import art.shittim.secure.authenticatePerm
 import art.shittim.utils.UUID
 import io.ktor.http.*
 import io.ktor.resources.*
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import io.ktor.server.pebble.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
@@ -22,12 +26,6 @@ class Read {
     @Resource("json")
     class Json(val parent: Read = Read())
 
-    @Resource("plain")
-    class Plain(val parent: Read = Read())
-
-    @Resource("markdown")
-    class Markdown(val parent: Read = Read())
-
     @Resource("html")
     class Html(val parent: Read = Read())
 }
@@ -40,6 +38,7 @@ data class IdArticleLine(
     val contrib: String,
     val unsure: Boolean,
     val sensitive: Boolean,
+    val hidden: Boolean,
 )
 
 @Serializable
@@ -49,6 +48,7 @@ data class PebArticleLine(
     val contrib: String,
     val unsure: Boolean,
     val sensitive: Boolean,
+    val hidden: Boolean
 )
 
 @Serializable
@@ -74,65 +74,80 @@ val `ウシオ-ノアs` = listOf(
 fun Route.readRoutes() {
     get<Read.Json> {
         val lines = newSuspendedTransaction {
-            ArticleService.ArticleEntity.all().map {
-                IdArticleLine(
-                    it.id.value,
-                    it.line,
-                    it.time,
-                    it.contrib,
-                    it.unsure,
-                    it.sensitive
-                )
-            }
+            ArticleService.ArticleEntity.all()
+                .filter { it.hidden == false }
+                .map {
+                    IdArticleLine(
+                        it.id.value,
+                        it.line,
+                        it.time,
+                        it.contrib,
+                        it.unsure,
+                        it.sensitive,
+                        it.hidden
+                    )
+                }
         }
 
         call.respond(HttpStatusCode.OK, lines)
     }
-
     get<JsonWithTally> {
         val lines = newSuspendedTransaction {
-            ArticleService.ArticleEntity.all().map {
-                IdArticleLine(
-                    it.id.value,
-                    it.line,
-                    it.time,
-                    it.contrib,
-                    it.unsure,
-                    it.sensitive
-                )
-            }
+            ArticleService.ArticleEntity.all()
+                .filter { it.hidden == false }
+                .map {
+                    IdArticleLine(
+                        it.id.value,
+                        it.line,
+                        it.time,
+                        it.contrib,
+                        it.unsure,
+                        it.sensitive,
+                        it.hidden
+                    )
+                }
         }
 
         call.respond(HttpStatusCode.OK, JsonWithTallyResponse(lines, lines.size))
     }
 
-
-    get<Read.Plain> {
-        val lines = newSuspendedTransaction {
-            ArticleService.ArticleEntity.all().map {
-                "${it.line} ${if (it.unsure) "\nWarning: The content above is a unsure content, we can't judge its realness" else ""}"
-            }
-        }
-
-        call.respond(HttpStatusCode.OK, lines.joinToString(separator = "\n\n"))
-    }
-
-    get<Read.Markdown> {
-        val sb = StringBuilder()
-        var i = 0
-
-        sb.appendLine("# 英才二班典籍\n")
-
-        newSuspendedTransaction {
-            ArticleService.ArticleEntity.all().map {
-                it.line
-            }
-                .forEach {
-                    sb.appendLine("${++i}.  $it")
+    authenticate("auth-jwt", optional = true) {
+        authenticatePerm(PArticleHidden) {
+            get<Read.Json> {
+                val lines = newSuspendedTransaction {
+                    ArticleService.ArticleEntity.all().map {
+                        IdArticleLine(
+                            it.id.value,
+                            it.line,
+                            it.time,
+                            it.contrib,
+                            it.unsure,
+                            it.sensitive,
+                            it.hidden
+                        )
+                    }
                 }
-        }
 
-        call.respond(HttpStatusCode.OK, sb.toString())
+                call.respond(HttpStatusCode.OK, lines)
+            }
+            get<JsonWithTally> {
+                val lines = newSuspendedTransaction {
+                    ArticleService.ArticleEntity.all().map {
+                        IdArticleLine(
+                            it.id.value,
+                            it.line,
+                            it.time,
+                            it.contrib,
+                            it.unsure,
+                            it.sensitive,
+                            it.hidden
+                        )
+                    }
+                }
+
+                call.respond(HttpStatusCode.OK, JsonWithTallyResponse(lines, lines.size))
+            }
+        }
     }
 
     get<Read.Html> {
@@ -143,7 +158,8 @@ fun Route.readRoutes() {
                     it.time,
                     it.contrib,
                     it.unsure,
-                    it.sensitive
+                    it.sensitive,
+                    it.hidden
                 )
             }
         }
@@ -186,7 +202,8 @@ fun Route.readRoutes() {
                 line.time,
                 line.contrib,
                 line.unsure,
-                line.sensitive
+                line.sensitive,
+                line.hidden
             )
         )
     }

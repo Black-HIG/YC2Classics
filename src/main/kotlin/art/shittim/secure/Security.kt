@@ -93,16 +93,22 @@ data class UserPassword(
     val password: String
 )
 
+@Serializable
+data class JwtBean(
+    val jwt: String
+)
+
+val jwtVerifier = JWT
+    .require(Algorithm.HMAC256(secret))
+    .withAudience(audience)
+    .withIssuer(issuer)
+    .build()
+
 fun Application.configureSecurity() {
     install(Authentication) {
         jwt("auth-jwt") {
             realm = myRealm
-            verifier(JWT
-                .require(Algorithm.HMAC256(secret))
-                .withAudience(audience)
-                .withIssuer(issuer)
-                .build()
-            )
+            verifier(jwtVerifier)
 
             validate { credential ->
                 if(credential.payload.getClaim("username").asString() != "") {
@@ -139,6 +145,19 @@ fun Application.configureSecurity() {
 
             call.respond(hashMapOf("token" to token))
             logger.info("User {} just logged in", user.username)
+        }
+
+        post("/validate") {
+            val jwt = call.receive<JwtBean>()
+
+            try {
+                jwtVerifier.verify(jwt.jwt)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.Forbidden, "Invalid jwt token")
+                return@post
+            }
+
+            call.respond(HttpStatusCode.OK)
         }
     }
 }
