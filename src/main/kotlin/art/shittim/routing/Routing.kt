@@ -1,5 +1,6 @@
 package art.shittim.routing
 
+import art.shittim.secure.securityRoutes
 import io.ktor.server.application.*
 import io.ktor.server.http.content.static
 import io.ktor.server.http.content.staticResources
@@ -15,8 +16,11 @@ fun Application.configureRouting() {
             swaggerFile = "openapi/documentation.yaml",
         )*/
 
-        readRoutes()
-        writeRoutes()
-        userRoutes()
+        route("/api") {
+            readRoutes()
+            writeRoutes()
+            userRoutes()
+            securityRoutes()
+        }
     }
 }

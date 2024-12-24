@@ -4,6 +4,7 @@ import art.shittim.db.userService
 import art.shittim.logger
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.interfaces.JWTVerifier
 import de.mkammerer.argon2.Argon2
 import de.mkammerer.argon2.Argon2Factory
 import io.ktor.client.*
@@ -98,7 +99,7 @@ data class JwtBean(
     val jwt: String
 )
 
-val jwtVerifier = JWT
+val jwtVerifier: JWTVerifier = JWT
     .require(Algorithm.HMAC256(secret))
     .withAudience(audience)
     .withIssuer(issuer)
@@ -123,41 +124,41 @@ fun Application.configureSecurity() {
             }
         }
     }
+}
 
-    routing {
-        post("/user/login") {
-            val user = call.receive<UserPassword>()
+fun Route.securityRoutes() {
+    post("/user/login") {
+        val user = call.receive<UserPassword>()
 
-            val perm = userService.auth(user.username, user.password)
+        val perm = userService.auth(user.username, user.password)
 
-            if(perm == -1L) {
-                call.respond(HttpStatusCode.Unauthorized, "Invalid username or password")
-                return@post
-            }
-
-            val token = JWT.create()
-                .withAudience(audience)
-                .withIssuer(issuer)
-                .withClaim("username", user.username)
-                .withClaim("perm", perm)
-                .withExpiresAt(Date(System.currentTimeMillis() + 6000 * 1000))
-                .sign(Algorithm.HMAC256(secret))
-
-            call.respond(hashMapOf("token" to token))
-            logger.info("User {} just logged in", user.username)
+        if(perm == -1L) {
+            call.respond(HttpStatusCode.Unauthorized, "Invalid username or password")
+            return@post
         }
 
-        post("/validate") {
-            val jwt = call.receive<JwtBean>()
+        val token = JWT.create()
+            .withAudience(audience)
+            .withIssuer(issuer)
+            .withClaim("username", user.username)
+            .withClaim("perm", perm)
+            .withExpiresAt(Date(System.currentTimeMillis() + 6000 * 1000))
+            .sign(Algorithm.HMAC256(secret))
 
-            try {
-                jwtVerifier.verify(jwt.jwt)
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.Forbidden, "Invalid jwt token")
-                return@post
-            }
+        call.respond(hashMapOf("token" to token))
+        logger.info("User {} just logged in", user.username)
+    }
 
-            call.respond(HttpStatusCode.OK)
+    post("/validate") {
+        val jwt = call.receive<JwtBean>()
+
+        try {
+            jwtVerifier.verify(jwt.jwt)
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.Forbidden, "Invalid jwt token")
+            return@post
         }
+
+        call.respond(HttpStatusCode.OK)
     }
 }

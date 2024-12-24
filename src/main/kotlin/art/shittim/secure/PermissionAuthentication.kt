@@ -8,6 +8,26 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
+suspend fun RoutingContext.hasPerm(
+    requiresPerms: List<Long>,
+    ifPresent: suspend RoutingContext.() -> Unit,
+    ifAbsent: suspend RoutingContext.() -> Unit
+) {
+    val perm = call.principal<JWTPrincipal>()?.payload?.getClaim("perm")?.asLong() ?: 0
+
+    var passed = true
+
+    requiresPerms.forEach {
+        passed = passed && (perm hasPerm it)
+    }
+
+    if(passed) {
+        ifPresent()
+    } else {
+        ifAbsent()
+    }
+}
+
 val PermissionAuthorizationPlugin = createRouteScopedPlugin(
     name = "PermAuthorizationPlugin",
     createConfiguration = ::PermAuthConfiguration
@@ -42,7 +62,7 @@ class PermAuthConfiguration {
 }
 
 fun Route.authenticatePerm(
-    vararg required :Long,
+    vararg required : Long,
     build: Route.() -> Unit
 ) : Route {
     val authenticatedRoute = createChild(AuthenticationRouteSelector(emptyList()))
