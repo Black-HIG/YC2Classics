@@ -2,7 +2,7 @@ services:
   web:
     env_file:
       - .env
-    image: blackhig/yc2-classics
+    build: .
     ports:
       - "25611:31234"
     restart: always
