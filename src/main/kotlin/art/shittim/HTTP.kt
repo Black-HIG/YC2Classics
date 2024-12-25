@@ -8,15 +8,13 @@ import io.pebbletemplates.pebble.loader.ClasspathLoader
 
 fun Application.configureHTTP() {
     install(CORS) {
-        anyHost()
-        allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)
         allowMethod(HttpMethod.Delete)
         allowMethod(HttpMethod.Patch)
         allowHeader(HttpHeaders.Authorization)
     }
-    
+
     install(Pebble) {
         loader(ClasspathLoader())
     }
