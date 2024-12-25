@@ -17,7 +17,7 @@ class ArticleService(db: Database) {
         val line = text("line")
         val unsure = bool("unsure")
         val sensitive = bool("sensitive")
-        val hidden = bool("hidden").default(false)
+        val hidden = bool("hidden").nullable()
     }
 
     class ArticleEntity(id: EntityID<UUID>) : UUIDEntity(id) {
