@@ -49,7 +49,6 @@ dependencies {
     implementation("io.ktor:ktor-server-resources-jvm")
     implementation("io.ktor:ktor-server-cors-jvm")
     implementation("io.ktor:ktor-server-auth")
-    implementation("io.ktor:ktor-server-pebble")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-cio")
     implementation("io.ktor:ktor-server-openapi")

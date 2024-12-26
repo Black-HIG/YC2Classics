@@ -3,16 +3,11 @@ package art.shittim.routing
 import art.shittim.db.ArticleService
 import art.shittim.routing.Read.JsonWithTally
 import art.shittim.secure.PAccountList
-import art.shittim.secure.PArticleHidden
-import art.shittim.secure.authenticatePerm
 import art.shittim.secure.hasPerm
 import art.shittim.utils.UUID
 import io.ktor.http.*
 import io.ktor.resources.*
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.principal
-import io.ktor.server.pebble.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -27,9 +22,6 @@ class Read {
 
     @Resource("json")
     class Json(val parent: Read = Read())
-
-    @Resource("html")
-    class Html(val parent: Read = Read())
 }
 
 @Serializable
@@ -41,16 +33,6 @@ data class IdArticleLine(
     val unsure: Boolean,
     val sensitive: Boolean,
     val hidden: Boolean,
-)
-
-@Serializable
-data class PebArticleLine(
-    val line: String,
-    val time: String,
-    val contrib: String,
-    val unsure: Boolean,
-    val sensitive: Boolean,
-    val hidden: Boolean
 )
 
 @Serializable
@@ -158,36 +140,6 @@ fun Route.readRoutes() {
                 }
             )
         }
-    }
-
-    get<Read.Html> {
-        val lines = newSuspendedTransaction {
-            ArticleService.ArticleEntity.all().map {
-                PebArticleLine(
-                    it.line,
-                    it.time,
-                    it.contrib,
-                    it.unsure,
-                    it.sensitive,
-                    it.hidden
-                )
-            }
-        }
-
-        val iconUrl = `ウシオ-ノアs`.random().replace("/kivo", kivo)
-
-        call.respond(
-            HttpStatusCode.OK,
-            PebbleContent(
-                "article.peb",
-                mapOf(
-                    "lines" to lines,
-                    "header" to System.getenv("WEB_HEADER"),
-                    "footer" to System.getenv("WEB_FOOTER"),
-                    "icon_url" to iconUrl
-                )
-            )
-        )
     }
 
     get("/") {
