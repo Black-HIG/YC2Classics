@@ -2,18 +2,14 @@ package art.shittim.secure
 
 import art.shittim.db.userService
 import art.shittim.logger
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
-import com.auth0.jwt.interfaces.JWTVerifier
+import art.shittim.secure.JwtUtils.accessJwtVerifier
+import art.shittim.secure.JwtUtils.MY_REALM
+import art.shittim.secure.JwtUtils.makeAccessToken
+import art.shittim.secure.JwtUtils.makeRefreshToken
+import art.shittim.secure.JwtUtils.refreshJwtVerifier
 import de.mkammerer.argon2.Argon2
 import de.mkammerer.argon2.Argon2Factory
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -21,28 +17,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import java.util.*
-
-@Serializable
-data class TokenCheckResult(
-    val valid: Boolean,
-    val error: String?,
-    val data: Data?,
-    val code: Int
-) {
-    @Serializable
-    data class Data(
-        val value: Int
-    )
-}
-
-val httpClient by lazy {
-    HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json()
-        }
-    }
-}
 
 fun generateRandomString(length: Int): String {
     val characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
@@ -59,35 +33,6 @@ fun argon2verify(data: String, source: String) = argon2.verify(data, source.toCh
 
 fun String.hashed() = argon2hash(this)
 
-@Suppress("unused")
-@Deprecated(message = "Use jwt rather than token api", level = DeprecationLevel.HIDDEN)
-suspend fun tokenValidity(token: String): Boolean {
-    val response = httpClient.get {
-        url {
-            protocol = URLProtocol.HTTPS
-            //host = config.token.url
-
-            //path(config.token.path)
-
-            parameters.append("api", "check")
-            parameters.append("token", token)
-        }
-    }
-
-    val result : TokenCheckResult = response.body()
-
-    return if(result.valid) {
-        result.data!!.value and 0b0100 > 0
-    } else {
-        false
-    }
-}
-
-val secret = System.getenv("JWT_SECRET") ?: "yc2_waterstarlake"
-const val issuer = "classics.shittim.art"
-const val audience = "classics.shittim.art"
-const val myRealm = "YC2 Classics Access"
-
 @Serializable
 data class UserPassword(
     val username: String,
@@ -95,21 +40,16 @@ data class UserPassword(
 )
 
 @Serializable
-data class JwtBean(
-    val jwt: String
+data class TokenCredentials(
+    val accessToken: String,
+    val refreshToken: String,
 )
-
-val jwtVerifier: JWTVerifier = JWT
-    .require(Algorithm.HMAC256(secret))
-    .withAudience(audience)
-    .withIssuer(issuer)
-    .build()
 
 fun Application.configureSecurity() {
     install(Authentication) {
         jwt("auth-jwt") {
-            realm = myRealm
-            verifier(jwtVerifier)
+            realm = MY_REALM
+            verifier(accessJwtVerifier)
 
             validate { credential ->
                 if(credential.payload.getClaim("username").asString() != "") {
@@ -120,7 +60,24 @@ fun Application.configureSecurity() {
             }
 
             challenge { _, _ ->
-                call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
+                call.respond(HttpStatusCode.Unauthorized, "Access token is not valid or has expired")
+            }
+        }
+
+        jwt("refresh-jwt") {
+            realm = MY_REALM
+            verifier(refreshJwtVerifier)
+
+            validate { credential ->
+                if(credential.payload.getClaim("username").asString() != "") {
+                    JWTPrincipal(credential.payload)
+                } else {
+                    null
+                }
+            }
+
+            challenge { _, _ ->
+                call.respond(HttpStatusCode.Unauthorized, "Refresh token is not valid or has expired")
             }
         }
     }
@@ -137,28 +94,85 @@ fun Route.securityRoutes() {
             return@post
         }
 
-        val token = JWT.create()
-            .withAudience(audience)
-            .withIssuer(issuer)
-            .withClaim("username", user.username)
-            .withClaim("perm", perm)
-            .withExpiresAt(Date(System.currentTimeMillis() + 6000 * 1000))
-            .sign(Algorithm.HMAC256(secret))
+        val accessToken = makeAccessToken(user.username, perm)
+        val refreshToken = makeRefreshToken(user.username, perm)
 
-        call.respond(hashMapOf("token" to token))
+        RefreshTokenStore[user.username] = refreshToken
+
+        call.respond(
+            TokenCredentials(
+                accessToken,
+                refreshToken
+            )
+        )
+
         logger.info("User {} just logged in", user.username)
     }
 
-    post("/validate") {
-        val jwt = call.receive<JwtBean>()
+    authenticate("refresh-jwt") {
+        post("/user/refresh") {
+            val token = call.request.header(HttpHeaders.Authorization)!!.removePrefix("Bearer ")
 
-        try {
-            jwtVerifier.verify(jwt.jwt)
-        } catch (e: Exception) {
-            call.respond(HttpStatusCode.Forbidden, "Invalid jwt token")
-            return@post
+            val username = call.principal<JWTPrincipal>()!!.payload.getClaim("username").asString()
+            val perm = call.principal<JWTPrincipal>()!!.payload.getClaim("perm").asLong()
+
+            if(RefreshTokenStore[username] == token) {
+                val accessToken = makeAccessToken(username, perm)
+
+                call.respond(
+                    HttpStatusCode.OK,
+                    TokenCredentials(
+                        accessToken,
+                        token
+                    )
+                )
+            } else {
+                call.respond(HttpStatusCode.Unauthorized, "Invalid refresh token")
+            }
+        }
+    }
+
+    post("/user/validate") {
+        @Serializable
+        data class ValidateResult(
+            val valid: Boolean,
+            val type: String
+        )
+
+        @Serializable
+        data class ValidateRequestBody(
+            val token: String
+        )
+
+        val token = call.receive<ValidateRequestBody>().token
+
+        val isAccessToken = {
+            try {
+                accessJwtVerifier.verify(token)
+                true
+            } catch (_: Exception) {
+                false
+            }
         }
 
-        call.respond(HttpStatusCode.OK)
+        val isRefreshToken = {
+            try {
+                val payload = refreshJwtVerifier.verify(token)!!
+
+                val username = payload.getClaim("username").asString()
+
+                RefreshTokenStore[username] == token
+            } catch (_: Exception) {
+                false
+            }
+        }
+
+        call.respond(
+            HttpStatusCode.OK,
+            ValidateResult(
+                isRefreshToken() || isAccessToken(),
+                if(isRefreshToken()) "refresh" else if(isAccessToken()) "access" else "💩"
+            )
+        )
     }
 }
