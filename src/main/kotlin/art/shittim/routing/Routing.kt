@@ -14,12 +14,9 @@ fun Application.configureRouting() {
             path = "openapi",
             swaggerFile = "openapi/documentation.yaml",
         )*/
-
-        route("/api") {
-            readRoutes()
-            writeRoutes()
-            userRoutes()
-            securityRoutes()
-        }
+        readRoutes()
+        writeRoutes()
+        userRoutes()
+        securityRoutes()
     }
 }
