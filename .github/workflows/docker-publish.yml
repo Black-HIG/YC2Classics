@@ -1,0 +1,29 @@
+name: Gradle Publish Docker Image
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  docker-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'adoptopenjdk'
+
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v4
+
+    - name: Publish Docker Image
+      run: ./gradlew publishImage
+      env:
+        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+        DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
