@@ -141,11 +141,7 @@ fun Route.readRoutes() {
             )
         }
     }
-
-    get("/") {
-        call.respondRedirect("/read/html")
-    }
-
+    
     get("/line/{id}") {
         val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
         val line = try {
