@@ -25,6 +25,9 @@ jobs:
       with:
         gradle-version: release-candidate
 
+    - name: Give execute permissions to gradlew
+      run: chmod +x ./gradlew
+
     - name: Publish Docker Image
       run: ./gradlew publishImage
       env:
