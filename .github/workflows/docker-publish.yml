@@ -7,7 +7,7 @@ on:
 
 jobs:
   docker-publish:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -27,9 +27,6 @@ jobs:
 
     - name: Give execute permissions to gradlew
       run: chmod +x ./gradlew
-
-    - name: Build Jar
-      run: ./gradlew build --no-daemon
 
     - name: Publish Docker Image
       run: ./gradlew publishImage --no-daemon
