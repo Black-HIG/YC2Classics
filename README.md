@@ -1,5 +1,9 @@
 [![Better Stack Badge](https://uptime.betterstack.com/status-badges/v3/monitor/1plyu.svg)](https://uptime.betterstack.com/?utm_source=status_badge)
 
+# Deprecated
+
+We are working with new [Workers Classics API](https://github.com/ZZSZ-YCT/classics-api)
+
 # YC2Classics
 
 A server backend for some article storage
